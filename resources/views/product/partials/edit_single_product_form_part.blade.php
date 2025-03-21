@@ -31,7 +31,7 @@
                     <td>
                         <input type="hidden" name="single_variation_id" value="{{$variation->id}}">
 
-                        <div class="col-sm-6">
+                        <div class="col-sm-6" hidden>
                           {!! Form::label('single_dpp', trans('product.exc_of_tax') . ':*') !!}
 
                           {!! Form::text('single_dpp', @num_format($variation->default_purchase_price), ['class' => 'form-control input-sm dpp input_number', 'placeholder' => __('product.exc_of_tax'), 'required']); !!}
