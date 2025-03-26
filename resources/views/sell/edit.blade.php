@@ -107,17 +107,17 @@
 						<small class="text-danger @if(empty($customer_due)) hide @endif contact_due_text"><strong>@lang('account.customer_due'):</strong> <span>{{$customer_due ?? ''}}</span></small>
 					</div>
 					<small>
-						<strong>
+						<!-- <strong>
 							@lang('lang_v1.billing_address'):
-						</strong>
-						<div id="billing_address_div">
+						</strong> -->
+						<div id="billing_address_div" hidden>
 							{!! $transaction->contact->contact_address ?? '' !!}
 						</div>
 						<br>
-						<strong>
+						<!-- <strong>
 							@lang('lang_v1.shipping_address'):
-						</strong>
-						<div id="shipping_address_div">
+						</strong> -->
+						<div id="shipping_address_div" hidden>
 							{!! $transaction->contact->supplier_business_name ?? '' !!}, <br>
 							{!! $transaction->contact->name ?? '' !!}, <br>
 							{!!$transaction->contact->shipping_address ?? '' !!}
@@ -179,7 +179,7 @@
 				@if($transaction->type == 'sales_order')
 					<input type="hidden" name="status" id="status" value="{{$transaction->status}}">
 				@else
-					<div class="@if(!empty($commission_agent)) col-sm-3 @else col-sm-4 @endif">
+					<div class="@if(!empty($commission_agent)) col-sm-3 @else col-sm-4 @endif" hidden>
 						<div class="form-group">
 							{!! Form::label('status', __('sale.status') . ':*') !!}
 							{!! Form::select('status', $statuses, $status, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'required']); !!}
@@ -195,7 +195,7 @@
 				</div>
 				@endif
 				@can('edit_invoice_number')
-				<div class="col-sm-3">
+				<div class="col-sm-3" hidden>
 					<div class="form-group">
 						{!! Form::label('invoice_no', $transaction->type == 'sales_order' ? __('restaurant.order_no'): __('sale.invoice_no') . ':') !!}
 						{!! Form::text('invoice_no', $transaction->invoice_no, ['class' => 'form-control', 'placeholder' => $transaction->type == 'sales_order' ? __('restaurant.order_no'): __('sale.invoice_no')]); !!}
@@ -279,7 +279,7 @@
 				        </div>
 				    </div>
 		        @endif
-		        <div class="col-sm-3">
+		        <div class="col-sm-3" hidden>
 	                <div class="form-group">
 	                    {!! Form::label('upload_document', __('purchase.attach_document') . ':') !!}
 	                    {!! Form::file('sell_document', ['id' => 'upload_document', 'accept' => implode(',', array_keys(config('constants.document_upload_mimes_types')))]); !!}
@@ -398,7 +398,7 @@
 				</div>
 			@endcomponent
 
-			@component('components.widget', ['class' => 'box-solid'])
+			@component('components.widget', ['class' => 'box-solid hidden'])
 				<div class="col-md-4 @if($transaction->type == 'sales_order') hide @endif">
 			        <div class="form-group">
 			            {!! Form::label('discount_type', __('sale.discount_type') . ':*' ) !!}
@@ -481,7 +481,7 @@
 				<input type="hidden" name="is_serial_no" value="1">
 			@endcomponent
 
-			@component('components.widget', ['class' => 'box-solid'])
+			@component('components.widget', ['class' => 'box-solid hidden'])
 			<div class="col-md-4">
 				<div class="form-group">
 		            {!! Form::label('shipping_details', __('sale.shipping_details')) !!}
