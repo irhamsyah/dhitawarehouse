@@ -520,7 +520,7 @@ return [
     'some_qty_returned_from_sell' => 'Beberapa kwantitas diretur pada penjualan ini',
     'sell_due' => 'Penjualan jatuh tempo',
     'sell_return_due' => 'Retur Penjualan jatuh tempo',
-    'total_sell_return_due' => 'Total Penjualan jatuh tempo',
+    'total_sell_return_due' => 'Total Retur Penjualan jatuh tempo',
     'pay_sell_return_due' => 'Bayaran Retur Penjualan Jatuh Tempo',
     'total_sell_return' => 'Total Retur Penjualan',
     'total_sell_return_paid' => 'Total Retur Penjualan Dibayar',
