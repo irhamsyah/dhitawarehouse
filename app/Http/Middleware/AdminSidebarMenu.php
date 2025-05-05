@@ -241,6 +241,42 @@ class AdminSidebarMenu
                 )->order(20);
             }
 
+            //Sales Admin dropdown
+            if (in_array('sales_admin', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create') || auth()->user()->can('purchase.update'))) {
+                $menu->dropdown(
+                    __('sales_admin.sales_admin'),
+                    function ($sub) use ($common_settings) {
+                        
+                        
+                            $sub->url(
+                                action([\App\Http\Controllers\SalesAdminController::class, 'index']),
+                                __('lang_v1.all_sales'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == null]
+                            );
+
+                            $sub->url(
+                                action([\App\Http\Controllers\SalesAdminController::class, 'create']),
+                                __('sale.add_sale'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'create' && empty(request()->get('status'))]
+                            );
+
+                            $sub->url(
+                                action([\App\Http\Controllers\SalesAdminController::class, 'target_penjualan']),
+                                __('lang_v1.sales_target'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'target-penjualan' && empty(request()->get('status'))]
+                            );
+                        
+                    },
+                    ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M12 15v-12"></path>
+                    <path d="M16 7l-4 -4l-4 4"></path>
+                    <path d="M3 12a9 9 0 0 0 18 0"></path>
+                  </svg>', 'id' => 'tour_step7']
+                )->order(25);
+            }
+
             //Purchase dropdown
             if (in_array('purchases', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create') || auth()->user()->can('purchase.update'))) {
                 $menu->dropdown(

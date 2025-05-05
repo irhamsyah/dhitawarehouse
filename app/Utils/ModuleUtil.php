@@ -470,6 +470,7 @@ class ModuleUtil extends Util
     public function availableModules()
     {
         return [
+            'sales_admin' => ['name' => __('sales_admin.sales_admin')],
             'purchases' => ['name' => __('purchase.purchases')],
             'add_sale' => ['name' => __('sale.add_sale')],
             'pos_sale' => ['name' => __('sale.pos_sale')],

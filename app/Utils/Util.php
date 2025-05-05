@@ -382,6 +382,20 @@ class Util
     }
 
     /**
+     * Checks if the given user is Sales
+     *
+     * @param  obj  $user
+     * @param  int  $business_id
+     * @return bool
+     */
+    public function is_sales($user, $business_id = null)
+    {
+        $business_id = empty($business_id) ? $user->business_id : $business_id;
+
+        return $user->hasRole('Sales#'.$business_id) ? true : false;
+    }
+
+    /**
      * Checks if the feature is allowed in demo
      *
      * @return mixed

@@ -3,6 +3,7 @@
 namespace App;
 
 use DB;
+use App\Contact;
 use Illuminate\Database\Eloquent\Model;
 
 class BusinessLocation extends Model
@@ -83,11 +84,37 @@ class BusinessLocation extends Model
                 ],
                 ];
             })->all();
-
+            // dd($locations);
             return ['locations' => $locations, 'attributes' => $attributes];
         } else {
+            // dd($locations);
             return $locations;
         }
+    }
+
+    /**
+     * Return list of locations for a salesman
+     *
+     * @param  int  $business_id
+     * @param  bool  $show_all = false
+     * @param  array  $receipt_printer_type_attribute =
+     * @return array
+     */
+    public static function forSalesman()
+    {
+        
+        $term = request()->input('q', '');
+        $user = User::findOrFail($term);
+        $permitted_locations = $user->permitted_locations();
+        $business_id = $user->business->id;
+        $query = BusinessLocation::where('business_id', $business_id)->Active();
+        if ($permitted_locations != 'all') {
+            $query->whereIn('id', $permitted_locations);
+        }
+        $result = $query->get();
+        $locations = $result->pluck('name', 'id');
+        // dd($locations);
+        return json_encode($locations);
     }
 
     public function price_group()

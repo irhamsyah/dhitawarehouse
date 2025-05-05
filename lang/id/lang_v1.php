@@ -850,6 +850,8 @@ return [
     'contact_custom_field3' => 'Bidang Kustom 3',
     'contact_custom_field4' => 'Bidang Kustom 4',
     'added_by' => 'Ditambahkan oleh',
+    'sale_by' => 'Dijual oleh',
+    'sales_target' => 'Target Penjualan',
     'authorized_signatory' => 'Penandatangan yang sah',
     'no_location_access_found' => 'Tidak ada akses lokasi ditemukan',
     'location_custom_field1' => 'Bidang khusus 1',

@@ -50,6 +50,8 @@ return [
 
     'sale_location' => 'Lokasi bisnis dari tempat Anda ingin menjual',
 
+    'sales_name' => 'Nama sales',
+
     'sale_discount' => "Tetapkan 'Diskon Penjualan Default' untuk semua penjualan di Pengaturan Bisnis. Klik ikon edit di bawah untuk menambah/memperbarui diskon.",
 
     'sale_tax' => "Tetapkan 'Pajak Penjualan Defaul' untuk semua penjualan di Pengaturan Bisnis. Klik ikon edit di bawah ini untuk menambah/memperbarui Pajak Pesanan.",
