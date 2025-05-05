@@ -70,7 +70,7 @@
                     [1, 'desc']
                 ],
                 "ajax": {
-                    "url": "/sales-admin",
+                    "url": "/sales-admin/target-penjualan",
                     "data": function(d) {
                         if ($('#sell_list_filter_date_range').val()) {
                             var start = $('#sell_list_filter_date_range').data('daterangepicker')
@@ -82,12 +82,7 @@
                         }
                         d.is_direct_sale = 1;
 
-                        d.location_id = $('#sell_list_filter_location_id').val();
-                        d.customer_id = $('#sell_list_filter_customer_id').val();
-                        d.payment_status = $('#sell_list_filter_payment_status').val();
-                        d.created_by = $('#created_by').val();
-                        d.sales_cmsn_agnt = $('#sales_cmsn_agnt').val();
-                        d.service_staffs = $('#service_staffs').val();
+                        d.added_by = $('#added_by').val();
 
                         if ($('#shipping_status').length) {
                             d.shipping_status = $('#shipping_status').val();
@@ -112,17 +107,18 @@
                 scrollX: true,
                 scrollCollapse: true,
                 columns: [
+                    
                     {
-                        data: 'invoice_no',
-                        name: 'invoice_no'
+                        data: 'added_by',
+                        name: 'added_by'
                     },
                     {
-                        data: 'conatct_name',
-                        name: 'conatct_name'
+                        data: 'total_paid',
+                        name: 'total_paid'
                     },
                     {
-                        data: 'mobile',
-                        name: 'contacts.mobile'
+                        data: 'remaining_target',
+                        name: 'remaining_target'
                     },
                     
                 ],
@@ -162,7 +158,7 @@
             });
 
             $(document).on('change',
-                '#sell_list_filter_location_id, #sell_list_filter_customer_id, #sell_list_filter_payment_status, #created_by, #sales_cmsn_agnt, #service_staffs, #shipping_status, #sell_list_filter_source, #payment_method',
+                '#added_by',
                 function() {
                     sell_table.ajax.reload();
                 });

@@ -370,6 +370,7 @@ class SellSalesPosController extends Controller
 
                 // $user_id = $request->session()->get('user.id');
                 $user_id = $input['selected_salesman'];
+                // dd($input['location_id']);
 
                 $discount = ['discount_type' => $input['discount_type'],
                     'discount_amount' => $input['discount_amount'],

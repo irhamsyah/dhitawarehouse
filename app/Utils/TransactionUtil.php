@@ -5190,6 +5190,36 @@ class TransactionUtil extends Util
     }
 
     /**
+     * common function to get
+     * list sell
+     *
+     * @param  int  $business_id
+     * @return object
+     */
+    public function getListSellsRecapBySalesman($business_id, $sale_type = 'sell')
+    {
+
+        $sells = DB::table('transactions')
+            ->join('model_has_roles', 'transactions.created_by', '=', 'model_has_roles.model_id')
+            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+            ->join('users as u', 'transactions.created_by', '=', 'u.id')
+            ->where('roles.name', 'Sales#1')
+            ->where('transactions.business_id', 1)
+            ->where('transactions.type', 'sell')
+            ->where('transactions.status', 'final')
+            ->groupBy('transactions.created_by')
+            ->select(
+                'transactions.created_by',
+                DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS added_by"),
+                DB::raw("SUM((SELECT SUM(IF(TP.is_return = 1, -1 * TP.amount, TP.amount)) 
+                              FROM transaction_payments AS TP 
+                              WHERE TP.transaction_id = transactions.id)) AS total_paid")
+            );
+        
+        return $sells;
+    }
+
+    /**
      * Function to get ledger details
      */
     public function getLedgerDetails($contact_id, $start, $end, $format = 'format_1', $location_id = null, $line_details = false)

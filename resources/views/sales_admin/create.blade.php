@@ -1039,6 +1039,7 @@
 									`<option value="${location.id}">${location.name}</option>`
 								);
 							});
+							$('#location_id').val(result[0].id);
 						} else {
 							$locationSelect.append(
 								'<option value="">No location available</option>'
@@ -1079,6 +1080,7 @@
 									`<option value="${location.id}">${location.name}</option>`
 								);
 							});
+							$('#location_id').val(result[0].id);
 						} else {
 							$locationSelect.append(
 								'<option value="">No location available</option>'
