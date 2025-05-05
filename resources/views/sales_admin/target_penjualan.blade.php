@@ -24,7 +24,8 @@
                         <tr>                            
                             <th class="tw-w-64">@lang('sales_admin.name')</th>
                             <th class="tw-w-64">@lang('sales_admin.total_sales')</th>
-                            <th class="tw-w-64">@lang('sales_admin.remaining_target')</th>                            
+                            <th class="tw-w-64">@lang('sales_admin.remaining_target')</th>  
+                            <th class="tw-w-64">nama</th>                           
                         </tr>
                     </thead>
                     <tbody></tbody>                    
@@ -110,15 +111,28 @@
                     
                     {
                         data: 'added_by',
-                        name: 'added_by'
+                        name: 'added_by',
+                        "searchable": false
                     },
                     {
                         data: 'total_paid',
-                        name: 'total_paid'
+                        name: 'total_paid',
+                        "searchable": false
                     },
                     {
                         data: 'remaining_target',
-                        name: 'remaining_target'
+                        name: 'remaining_target',
+                        "searchable": false
+                    },
+                    {
+                        data: 'first_name',
+                        name: 'u.first_name',
+                        visible: false
+                    },
+                    {
+                        data: 'last_name',
+                        name: 'u.last_name',
+                        visible: false
                     },
                     
                 ],

@@ -5209,6 +5209,8 @@ class TransactionUtil extends Util
             ->where('transactions.status', 'final')
             ->groupBy('transactions.created_by')
             ->select(
+                'u.first_name',
+                'u.last_name',
                 'transactions.created_by',
                 DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS added_by"),
                 DB::raw("SUM((SELECT SUM(IF(TP.is_return = 1, -1 * TP.amount, TP.amount)) 

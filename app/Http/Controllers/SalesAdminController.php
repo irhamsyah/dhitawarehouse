@@ -670,8 +670,12 @@ class SalesAdminController extends Controller
                 'total_paid',
                 '<span class="total-paid" data-orig-value="{{$total_paid}}">@format_currency($total_paid)</span>'
             )
-            ->filterColumn('nama', function ($query, $keyword) {
-                $query->whereRaw("added_by like ?", ["%{$keyword}%"]);
+            ->filterColumn('total_paid', function($query, $keyword) {
+                $query->whereRaw("(
+                    SELECT SUM(IF(TP.is_return = 1, -1 * TP.amount, TP.amount))
+                    FROM transaction_payments AS TP
+                    WHERE TP.transaction_id = transactions.id
+                ) LIKE ?", ["%{$keyword}%"]);
             })
             ->addColumn('remaining_target', function ($row) {
                 $remaining = 100000;
@@ -679,7 +683,9 @@ class SalesAdminController extends Controller
                 return $remaining_target;
             });
 
-            $rawColumns = ['remaining_target', 'added_by', 'total_paid'];
+            // dd($datatable);
+
+            $rawColumns = ['remaining_target', 'added_by', 'total_paid','first_name','last_name'];
 
             // dd($datatable->make(true));
 
