@@ -677,8 +677,9 @@ class SalesAdminController extends Controller
                     WHERE TP.transaction_id = transactions.id
                 ) LIKE ?", ["%{$keyword}%"]);
             })
-            ->addColumn('remaining_target', function ($row) {
-                $remaining = 100000;
+            ->editColumn('remaining_target', function ($row) {
+                $remaining = ($row->sales_target+$row->remaining_target) - $row->total_paid;
+                if($remaining<0)$remaining=0;
                 $remaining_target = '<span class="remaining" data-orig-value="'.$remaining.'">'.$this->transactionUtil->num_f($remaining, true).'</span>';
                 return $remaining_target;
             });
