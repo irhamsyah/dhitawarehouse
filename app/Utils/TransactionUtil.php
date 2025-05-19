@@ -8,6 +8,7 @@ use App\BusinessLocation;
 use App\CashDenomination;
 use App\Contact;
 use App\Currency;
+use Carbon\Carbon;
 use App\Events\TransactionPaymentAdded;
 use App\Events\TransactionPaymentDeleted;
 use App\Events\TransactionPaymentUpdated;
@@ -5199,6 +5200,9 @@ class TransactionUtil extends Util
     public function getListSellsRecapBySalesman($business_id, $sale_type = 'sell')
     {
 
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
         $sells = DB::table('transactions')
             ->join('model_has_roles', 'transactions.created_by', '=', 'model_has_roles.model_id')
             ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
@@ -5206,6 +5210,8 @@ class TransactionUtil extends Util
             ->where('roles.name', 'Sales#1')
             ->where('transactions.business_id', 1)
             ->where('transactions.type', 'sell')
+            ->whereMonth('transactions.transaction_date', $currentMonth)
+            ->whereYear('transactions.transaction_date', $currentYear)
             ->where('transactions.status', 'final')
             ->groupBy('transactions.created_by')
             ->select(
@@ -5219,7 +5225,6 @@ class TransactionUtil extends Util
                               FROM transaction_payments AS TP 
                               WHERE TP.transaction_id = transactions.id)) AS total_paid")
             );
-        
         return $sells;
     }
 
