@@ -12,6 +12,7 @@ return [
     */
 
     'expenses' => 'Biaya',
+    'salary_expenses' => 'Biaya Gaji',
     'expense_categories' => 'Kategori Biaya',
     'manage_your_expense_categories' => 'Mengelola kategori biaya Anda',
     'all_your_expense_categories' => 'Semua kategori biaya Anda',
@@ -26,6 +27,8 @@ return [
     'all_expenses' => 'Semua biaya',
     'expense_status' => 'Status biaya',
     'add_expense' => 'Tambahkan Biaya',
+    'add_salary' => 'Tambahkan Gaji',
+    'salary_expense' => 'Pengeluaran Gaji',
     'edit_expense' => 'Edit Biaya',
     'expense_note' => 'Catatan biaya',
     'expense_add_success' => 'Biaya berhasil ditambahkan',

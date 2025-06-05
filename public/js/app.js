@@ -1504,6 +1504,64 @@ $(document).ready(function() {
         },
     });
 
+    //Salary Expense table
+    expense_table = $('#salary_expense_table').DataTable({
+        processing: true,
+        serverSide: true,
+        fixedHeader:false,
+        aaSorting: [[1, 'desc']],
+        ajax: {
+            url: '/salary-expenses',
+            data: function(d) {
+                d.expense_for = $('select#expense_for').val();
+                d.contact_id = $('select#expense_contact_filter').val();
+                d.location_id = $('select#location_id').val();
+                d.expense_category_id = $('select#expense_category_id').val();
+                d.expense_sub_category_id = $('select#expense_sub_category_id_filter').val();
+                d.payment_status = $('select#expense_payment_status').val();
+                d.start_date = $('input#expense_date_range')
+                    .data('daterangepicker')
+                    .startDate.format('YYYY-MM-DD');
+                d.end_date = $('input#expense_date_range')
+                    .data('daterangepicker')
+                    .endDate.format('YYYY-MM-DD');
+            },
+        },
+        columns: [
+            { data: 'action', name: 'action', orderable: false, searchable: false },
+            { data: 'transaction_date', name: 'transaction_date' },
+            { data: 'ref_no', name: 'ref_no' },
+            { data: 'recur_details', name: 'recur_details', orderable: false, searchable: false },
+            { data: 'category', name: 'ec.name' },
+            { data: 'sub_category', name: 'esc.name' },
+            { data: 'location_name', name: 'bl.name' },
+            { data: 'payment_status', name: 'payment_status', orderable: false },
+            { data: 'tax', name: 'tr.name' },
+            { data: 'final_total', name: 'final_total' },
+            { data: 'payment_due', name: 'payment_due' },
+            { data: 'expense_for', name: 'expense_for' },
+            { data: 'contact_name', name: 'c.name' },
+            { data: 'additional_notes', name: 'additional_notes' },
+            { data: 'added_by', name: 'usr.first_name'}
+        ],
+        fnDrawCallback: function(row, data, start, end, display) {
+            var expense_total = sum_table_col($('#expense_table'), 'final-total');
+            var total_due = sum_table_col($('#expense_table'), 'payment_due');
+
+            $('.footer_expense_total').html(__currency_trans_from_en(expense_total));
+            $('.footer_total_due').html(__currency_trans_from_en(total_due));
+
+            $('.footer_payment_status_count').html(
+                __sum_status_html($('#expense_table'), 'payment-status')
+            );
+        },
+        createdRow: function(row, data, dataIndex) {
+            $(row)
+                .find('td:eq(4)')
+                .attr('class', 'clickable_td');
+        },
+    });
+
     $('select#location_id, select#expense_for, select#expense_contact_filter, \
         select#expense_category_id, select#expense_payment_status, \
         select#expense_sub_category_id_filter').on(

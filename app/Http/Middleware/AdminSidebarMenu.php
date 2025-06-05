@@ -522,12 +522,27 @@ class AdminSidebarMenu
                             __('lang_v1.list_expenses'),
                             ['icon' => '', 'active' => request()->segment(1) == 'expenses' || request()->segment(1) == 'import-expense' && request()->segment(2) == null]
                         );
+                        if (auth()->user()->can('expense.salary')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\ExpenseController::class, 'indexSalary']),
+                                __('lang_v1.list_salaries'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'salary-expenses' || request()->segment(1) == 'import-expense' && request()->segment(2) == null]
+                            );
+                        }
 
                         if (auth()->user()->can('expense.add')) {
                             $sub->url(
                                 action([\App\Http\Controllers\ExpenseController::class, 'create']),
                                 __('expense.add_expense'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'expenses' && request()->segment(2) == 'create']
+                            );
+                        }
+
+                        if (auth()->user()->can('expense.salary')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\ExpenseController::class, 'createSalary']),
+                                __('expense.add_salary'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'create-salary']
                             );
                         }
 

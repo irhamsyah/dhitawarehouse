@@ -328,6 +328,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::resource('expenses', ExpenseController::class);
     Route::get('import-expense', [ExpenseController::class, 'importExpense']);
     Route::post('store-import-expense', [ExpenseController::class, 'storeExpenseImport']);
+    Route::post('store-salary', [ExpenseController::class, 'storeSalary']);
+    Route::get('create-salary', [ExpenseController::class, 'createSalary']);
+    Route::get('salary-expenses', [ExpenseController::class, 'indexSalary']);
 
     //Transaction payments...
     // Route::get('/payments/opening-balance/{contact_id}', 'TransactionPaymentController@getOpeningBalancePayments');

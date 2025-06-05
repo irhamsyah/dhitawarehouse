@@ -46,6 +46,7 @@ return [
     'barcode_label_error' => 'SKU Id tidak didukung untuk jenis barcode yang dipilih',
     'list_products' => 'Daftar Produk',
     'list_expenses' => 'Daftar Biaya',
+    'list_salaries' => 'Daftar Gaji',
     'add_expiry' => 'Tambahkan item kedaluwarsa',
     'add_manufacturing_auto_expiry' => 'Tambahkan tanggal pembuatan & masa kedaluwarsa',
     'tooltip_enable_expiry' => 'Aktifkan kedaluwarsa produk. <br/> <br/><b>Tambahkan item kedaluwarsa</b>: Untuk langsung menambahkan item kedaluwarsa saja. <br/> <b>Tambahkan tanggal pembuatan & masa kedaluwarsa</b>: Untuk menambahkan tanggal pembuatan & masa kedaluwarsa dan menghitung tanggal kedaluwarsa berdasarkan itu.',

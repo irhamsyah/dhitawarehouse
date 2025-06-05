@@ -1499,6 +1499,14 @@
                   <div class="col-md-12">
                     <div class="checkbox">
                       <label>
+                        {!! Form::checkbox('permissions[]', 'expense.salary', in_array('expense.salary', $role_permissions), 
+                        [ 'class' => 'input-icheck']); !!} {{ __( 'expense.salary_expense' ) }}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-12">
+                    <div class="checkbox">
+                      <label>
                         {!! Form::checkbox('permissions[]', 'expense.add', in_array('expense.add', $role_permissions), 
                         [ 'class' => 'input-icheck']); !!} {{ __( 'expense.add_expense' ) }}
                       </label>
