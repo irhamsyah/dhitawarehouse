@@ -5203,28 +5203,41 @@ class TransactionUtil extends Util
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
 
-        $sells = DB::table('transactions')
-            ->join('model_has_roles', 'transactions.created_by', '=', 'model_has_roles.model_id')
-            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-            ->join('users as u', 'transactions.created_by', '=', 'u.id')
-            ->where('roles.name', 'Sales#1')
-            ->where('transactions.business_id', 1)
-            ->where('transactions.type', 'sell')
-            ->whereMonth('transactions.transaction_date', $currentMonth)
-            ->whereYear('transactions.transaction_date', $currentYear)
-            ->where('transactions.status', 'final')
-            ->groupBy('transactions.created_by')
-            ->select(
-                'u.first_name',
-                'u.last_name',
-                'u.sales_target',
-                'u.remaining_target',
-                'transactions.created_by',
-                DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS added_by"),
-                DB::raw("SUM((SELECT SUM(IF(TP.is_return = 1, -1 * TP.amount, TP.amount)) 
-                              FROM transaction_payments AS TP 
-                              WHERE TP.transaction_id = transactions.id)) AS total_paid")
-            );
+        $sells = DB::table('users as u')
+                    ->join('model_has_roles', 'u.id', '=', 'model_has_roles.model_id')
+                    ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+                    ->leftJoin('transactions', 'transactions.created_by', '=', 'u.id')
+                    ->where('roles.name', 'Sales#1')
+                    ->select(
+                        'u.first_name',
+                        'u.last_name',
+                        'u.sales_target',
+                        'u.remaining_target',
+                        'u.id as created_by',
+                        DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS added_by"),
+                        DB::raw("
+                            SUM(
+                                CASE
+                                    WHEN transactions.status = 'final'
+                                        AND transactions.business_id = 1
+                                        AND transactions.type = 'sell'
+                                        AND MONTH(transactions.transaction_date) = $currentMonth
+                                        AND YEAR(transactions.transaction_date) = $currentYear
+                                    THEN (
+                                        SELECT 
+                                            SUM(CASE 
+                                                    WHEN TP.is_return = 1 THEN -1 * TP.amount 
+                                                    ELSE TP.amount 
+                                                END)
+                                        FROM transaction_payments AS TP
+                                        WHERE TP.transaction_id = transactions.id
+                                    )
+                                    ELSE 0
+                                END
+                            ) AS total_paid
+                        ")
+                    )
+                    ->groupBy('u.id', 'u.first_name', 'u.last_name', 'u.sales_target', 'u.remaining_target', 'u.surname');
         return $sells;
     }
 
