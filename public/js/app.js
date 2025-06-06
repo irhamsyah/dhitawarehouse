@@ -1545,8 +1545,8 @@ $(document).ready(function() {
             { data: 'added_by', name: 'usr.first_name'}
         ],
         fnDrawCallback: function(row, data, start, end, display) {
-            var expense_total = sum_table_col($('#expense_table'), 'final-total');
-            var total_due = sum_table_col($('#expense_table'), 'payment_due');
+            var expense_total = sum_table_col($('#salary_expense_table'), 'final-total');
+            var total_due = sum_table_col($('#salary_expense_table'), 'payment_due');
 
             $('.footer_expense_total').html(__currency_trans_from_en(expense_total));
             $('.footer_total_due').html(__currency_trans_from_en(total_due));
