@@ -129,7 +129,7 @@ return [
     'cash' => 'Tunai',
     'card' => 'Kartu',
     'cheque' => 'Cek',
-    'bank_transfer' => 'Tranfer Bank',
+    'bank_transfer' => 'Transfer Bank',
     'other' => 'Lainnya',
     'payment' => 'Pembayaran',
     'total_items' => 'Total Item',

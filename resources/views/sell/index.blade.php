@@ -98,16 +98,18 @@
                     <tbody></tbody>
                     <tfoot>
                         <tr class="bg-gray font-17 footer-total text-center">
-                            <td colspan="6"><strong>@lang('sale.total'):</strong></td>
+                            <td ><strong>@lang('sale.total'):</strong></td>
                             <td class="footer_payment_status_count"></td>
-                            <td class="payment_method_count"></td>
+                            <!-- <td class="payment_method_count"></td> -->
                             <td class="footer_sale_total"></td>
-                            <td class="footer_total_paid"></td>
+                            <td class="footer_total_paid" ></td>                            
+                            <td class="footer_total_cash"></td>
+                            <td class="footer_total_transfer"></td>
                             <td class="footer_total_remaining"></td>
-                            <td class="footer_total_sell_return_due"></td>
-                            <td colspan="2"></td>
+                            <!-- <td class="footer_total_sell_return_due"></td> -->
+                            <!-- <td colspan="2"></td> -->
                             <td class="service_type_count"></td>
-                            <td colspan="7"></td>
+                            <!-- <td colspan="7"></td> -->
                         </tr>
                     </tfoot>
                 </table>
@@ -336,6 +338,8 @@
                     var footer_total_paid = 0;
                     var footer_total_remaining = 0;
                     var footer_total_sell_return_due = 0;
+                    var footer_total_transfer = 0;
+                    var footer_total_cash = 0;
                     for (var r in data) {
                         footer_sale_total += $(data[r].final_total).data('orig-value') ? parseFloat($(
                             data[r].final_total).data('orig-value')) : 0;
@@ -343,6 +347,21 @@
                             data[r].total_paid).data('orig-value')) : 0;
                         footer_total_remaining += $(data[r].total_remaining).data('orig-value') ?
                             parseFloat($(data[r].total_remaining).data('orig-value')) : 0;
+                         var element = $(data[r]['payment_methods']);
+                        // alert((element.data('orig-value') == 'Transfer Bank'));
+                        const origValue = (element.attr('data-orig-value') || '').trim().toLowerCase();
+                        console.log(origValue);
+                        console.log(origValue === 'transfer bank');
+                        if (origValue === 'transfer bank') {
+                            const value = parseFloat($(data[r].total_paid).attr('data-orig-value')) || 0;
+                            footer_total_transfer += value;
+                        } else {
+                            const value = parseFloat($(data[r].total_paid).attr('data-orig-value')) || 0;
+                            footer_total_cash += value;
+                        }
+
+                        // footer_total_cash = data[r].payment_methods;
+
                         footer_total_sell_return_due += $(data[r].return_due).find('.sell_return_due')
                             .data('orig-value') ? parseFloat($(data[r].return_due).find(
                                 '.sell_return_due').data('orig-value')) : 0;
@@ -350,9 +369,11 @@
 
                     $('.footer_total_sell_return_due').html(__currency_trans_from_en(
                         footer_total_sell_return_due));
-                    $('.footer_total_remaining').html(__currency_trans_from_en(footer_total_remaining));
-                    $('.footer_total_paid').html(__currency_trans_from_en(footer_total_paid));
-                    $('.footer_sale_total').html(__currency_trans_from_en(footer_sale_total));
+                    $('.footer_total_remaining').html('Total Belum Dibayar :<br>' +__currency_trans_from_en(footer_total_remaining));
+                    $('.footer_total_paid').html('Total Dibayar :<br>' +__currency_trans_from_en(footer_total_paid));
+                    $('.footer_sale_total').html('Total Penjualan :<br>' +__currency_trans_from_en(footer_sale_total));
+                    $('.footer_total_cash').html('Total Bayar Cash :<br>' + __currency_trans_from_en(footer_total_cash));
+                    $('.footer_total_transfer').html('Total Bayar Transfer :<br>' +__currency_trans_from_en(footer_total_transfer));
 
                     $('.footer_payment_status_count').html(__count_status(data, 'payment_status'));
                     $('.service_type_count').html(__count_status(data, 'types_of_service_name'));
