@@ -224,6 +224,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
     Route::resource('sales-admin', SalesAdminController::class)->except(['show']);
     Route::get('/sales-admin/target-penjualan', [SalesAdminController::class, 'target_penjualan']);
+    Route::get('/sales-admin/edit-target-penjualan/{product_id}/{location_id}', [SalesAdminController::class, 'editSalesTarget']);
+    Route::get('/sales-admin/target-item', [SalesAdminController::class, 'target_item']);
+    Route::put('sales-admin/update-shipping/{product_id}/{location_id}', [SalesAdminController::class, 'updateSalesTarget']);
 
     Route::get('/import-sales', [ImportSalesController::class, 'index']);
     Route::post('/import-sales/preview', [ImportSalesController::class, 'preview']);

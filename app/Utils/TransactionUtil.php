@@ -5242,6 +5242,35 @@ class TransactionUtil extends Util
     }
 
     /**
+     * common function to get
+     * list sell
+     *
+     * @param  int  $business_id
+     * @return object
+     */
+    public function getProductSellsRecapBySalesman($business_location)
+    {
+
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
+        $sells = $results = DB::table('product_locations')
+                            ->leftJoin('business_locations', 'product_locations.location_id', '=', 'business_locations.id')
+                            ->leftJoin('products', 'product_locations.product_id', '=', 'products.id')
+                            ->leftJoin('units', 'products.unit_id', '=', 'units.id')
+                            ->where('business_locations.id', $business_location)
+                            ->select(
+                                'business_locations.name as business_name',
+                                'products.name as product_name',
+                                'products.id as product_id',
+                                'units.actual_name as unit_name',
+                                DB::raw('CAST(product_locations.sales_target AS SIGNED) as sales_target'),
+                                DB::raw('CAST(product_locations.remaining_target AS SIGNED) as remaining_target')
+                            );
+        return $sells;
+    }
+
+    /**
      * Function to get ledger details
      */
     public function getLedgerDetails($contact_id, $start, $end, $format = 'format_1', $location_id = null, $line_details = false)

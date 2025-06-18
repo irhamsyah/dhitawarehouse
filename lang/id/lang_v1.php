@@ -853,6 +853,7 @@ return [
     'added_by' => 'Ditambahkan oleh',
     'sale_by' => 'Dijual oleh',
     'sales_target' => 'Target Penjualan',
+    'sales_target_item' => 'Target Penjualan Produk',
     'authorized_signatory' => 'Penandatangan yang sah',
     'no_location_access_found' => 'Tidak ada akses lokasi ditemukan',
     'location_custom_field1' => 'Bidang khusus 1',

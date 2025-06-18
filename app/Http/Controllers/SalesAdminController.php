@@ -24,6 +24,7 @@ use App\Utils\ProductUtil;
 use App\Utils\TransactionUtil;
 use App\Warranty;
 use DB;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Activitylog\Models\Activity;
@@ -724,6 +725,263 @@ class SalesAdminController extends Controller
         return view('sales_admin.target_penjualan')
         ->with(compact('business_locations', 'customers', 'is_woocommerce', 'sales_representative', 'is_cmsn_agent_enabled', 'commission_agents', 'service_staffs', 'is_tables_enabled', 'is_service_staff_enabled', 'is_types_service_enabled', 'shipping_statuses', 'sources', 'payment_types'));
     }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function target_item(Request $request)
+    {
+        $is_admin = $this->businessUtil->is_admin(auth()->user());
+
+        if (! $is_admin && ! auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'direct_sell.view', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping', 'so.view_all', 'so.view_own'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = request()->session()->get('user.business_id');
+        $is_woocommerce = $this->moduleUtil->isModuleInstalled('Woocommerce');
+        $is_crm = $this->moduleUtil->isModuleInstalled('Crm');
+        $is_tables_enabled = $this->transactionUtil->isModuleEnabled('tables');
+        $is_service_staff_enabled = $this->transactionUtil->isModuleEnabled('service_staff');
+        $is_types_service_enabled = $this->moduleUtil->isModuleEnabled('types_of_service');
+
+        $input = $request->except('_token');
+
+        
+
+        if (request()->ajax()) {
+            // dd(request()->all());
+            $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
+            $with = [];
+            $shipping_statuses = $this->transactionUtil->shipping_statuses();
+
+            $sale_type = ! empty(request()->input('sale_type')) ? request()->input('sale_type') : 'sell';
+            $location_id = 0;
+            $location_id = request()->input('location_id');    
+            $sales_id = request()->input('sales_id');
+
+            $sells = $this->transactionUtil->getProductSellsRecapBySalesman($location_id);
+
+            //  dd($sells);
+
+            // dd($sells->get());
+            $sales_order_statuses = Transaction::sales_order_statuses();
+            $datatable = Datatables::of($sells)->addColumn(
+                    'action',
+                    function ($row) use ($location_id) {
+                        $html = '<div class="btn-group">
+                                    <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info tw-w-max dropdown-toggle" 
+                                        data-toggle="dropdown" aria-expanded="false">'.
+                                        __('messages.actions').
+                                        '<span class="caret"></span><span class="sr-only">Toggle Dropdown
+                                        </span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-left" role="menu">';
+                        $html .= '<li><a href="#" data-href="'.action([\App\Http\Controllers\SalesAdminController::class, 'editSalesTarget'], [$row->product_id, $location_id]).'" class="btn-modal" data-container=".view_modal"><i class="fas fa-chart-line" aria-hidden="true"></i>'.__('Edit Target Penjualan').'</a></li>';
+                     $html .= '</ul></div>';
+
+                        return $html;
+                    }
+                )
+            ->addColumn(
+                'sales_name',
+                function($row) use ($sales_id){
+                    $result = DB::table('users as u')
+                        ->where('u.id', $sales_id)
+                        ->select(
+                            DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS added_by")
+                        )
+                        ->value('sales_name'); // gets a single value
+                    return $result;
+                }
+            )
+            ->addColumn('total_sale', function ($row) use ($location_id) {
+                $result = DB::table('transaction_sell_lines')
+                    ->join('transactions', 'transaction_sell_lines.transaction_id', '=', 'transactions.id')
+                    ->join('products', 'transaction_sell_lines.product_id', '=', 'products.id')
+                    ->where('transactions.type', 'sell')
+                    ->where('transactions.location_id', $location_id)
+                    ->where('products.id', $row->product_id)
+                    ->whereMonth('transactions.transaction_date', Carbon::now()->month)
+                    ->whereYear('transactions.transaction_date', Carbon::now()->year)
+                    ->select(DB::raw('SUM(transaction_sell_lines.quantity-transaction_sell_lines.quantity_returned) as total_quantity'))
+                    ->value('total_quantity'); // gets a single value
+
+                return ((int) ($result ?? 0)) . ' ' . $row->unit_name;
+            })
+            ->editColumn('sales_target', function ($row) use ($location_id) {                
+                return ($row->sales_target + $row->remaining_target). ' ' . $row->unit_name;
+            })
+            ->editColumn('remaining_target', function ($row) use ($location_id) {
+                $result = DB::table('transaction_sell_lines')
+                    ->join('transactions', 'transaction_sell_lines.transaction_id', '=', 'transactions.id')
+                    ->join('products', 'transaction_sell_lines.product_id', '=', 'products.id')
+                    ->where('transactions.type', 'sell')
+                    ->where('transactions.location_id', $location_id)
+                    ->where('products.id', $row->product_id)
+                    ->whereMonth('transactions.transaction_date', Carbon::now()->month)
+                    ->whereYear('transactions.transaction_date', Carbon::now()->year)
+                    ->select(DB::raw('SUM(transaction_sell_lines.quantity-transaction_sell_lines.quantity_returned) as total_quantity'))
+                    ->value('total_quantity'); // gets a single value
+
+                return max(0, (int) ($row->sales_target + $row->remaining_target - ($result ?? 0))) . ' ' . $row->unit_name;
+            });
+
+            // dd($datatable);
+
+            $rawColumns = ['action','remaining_target', 'product_name', 'sales_target'];
+
+            // dd($datatable->make(true));
+
+            return $datatable->rawColumns($rawColumns)
+                      ->make(true);
+        }
+
+        $business_locations = BusinessLocation::forDropdown($business_id, false);
+        $customers = Contact::customersDropdown($business_id, false);
+        $sales_representative = User::forDropdown($business_id, false, false, true);
+
+        //Commission agent filter
+        $is_cmsn_agent_enabled = request()->session()->get('business.sales_cmsn_agnt');
+        $commission_agents = [];
+        if (! empty($is_cmsn_agent_enabled)) {
+            $commission_agents = User::forDropdown($business_id, false, true, true);
+        }
+
+        //Service staff filter
+        $service_staffs = null;
+        if ($this->productUtil->isModuleEnabled('service_staff')) {
+            $service_staffs = $this->productUtil->serviceStaffDropdown($business_id);
+        }
+
+        $shipping_statuses = $this->transactionUtil->shipping_statuses();
+
+        $sources = $this->transactionUtil->getSources($business_id);
+        if ($is_woocommerce) {
+            $sources['woocommerce'] = 'Woocommerce';
+        }
+
+        $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
+
+        $salesman = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+                ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+                ->where('roles.name', 'Sales#1')
+                ->select('users.id', DB::raw("CONCAT(COALESCE(users.surname, ''),' ',COALESCE(users.first_name, ''),' ',COALESCE(users.last_name,'')) as name"),)
+                ->get();
+
+        $salesman = $salesman->pluck('name', 'id');
+
+        // $business_locations = $business_locations['locations'];
+
+        $default_location = null;
+        foreach ($business_locations as $id => $name) {
+            $default_location = BusinessLocation::findOrFail($id);
+            break;
+        }
+        // dd($default_location->id);
+        return view('sales_admin.target_item')
+        ->with(compact('default_location', 'salesman', 'business_locations', 'customers', 'is_woocommerce', 'sales_representative', 'is_cmsn_agent_enabled', 'commission_agents', 'service_staffs', 'is_tables_enabled', 'is_service_staff_enabled', 'is_types_service_enabled', 'shipping_statuses', 'sources', 'payment_types'));
+    }
+
+    /**
+     * Shows modal to edit shipping details.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function editSalesTarget($product_id, $location_id)
+    {
+        // $is_admin = $this->businessUtil->is_admin(auth()->user());
+
+        // if (! $is_admin && ! auth()->user()->hasAnyPermission(['access_shipping', 'access_own_shipping', 'access_commission_agent_shipping'])) {
+        //     abort(403, 'Unauthorized action.');
+        // }
+
+        // $business_id = request()->session()->get('user.business_id');
+
+        // $transaction = Transaction::where('business_id', $business_id)
+        //                         ->with(['media', 'media.uploaded_by_user'])
+        //                         ->findorfail($product_id);
+
+        // $users = User::forDropdown($business_id, false, false, false);
+
+        // $shipping_statuses = $this->transactionUtil->shipping_statuses();
+
+        // $activities = Activity::forSubject($transaction)
+        //    ->with(['causer', 'subject'])
+        //    ->where('activity_log.description', 'shipping_edited')
+        //    ->latest()
+        //    ->get();
+
+        $product_location = DB::table('product_locations')
+                    ->join('products', 'product_locations.product_id', '=', 'products.id')
+                    ->select('product_locations.*', 'products.name as product_name')
+                    ->where('product_locations.product_id', $product_id)
+                    ->where('product_locations.location_id', $location_id)
+                    ->first()   ;
+
+        // dd($product_location);
+        return view('sales_admin.partials.edit_sales_target')
+               ->with(compact('product_location'));
+    }
+
+    /**
+     * Update shipping.
+     *
+     * @param  Request  $request, int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function updateSalesTarget(Request $request, $product_id, $location_id)
+    {
+        // $is_admin = $this->businessUtil->is_admin(auth()->user());
+
+        // if (! $is_admin && ! auth()->user()->hasAnyPermission(['access_shipping', 'access_own_shipping', 'access_commission_agent_shipping'])) {
+        //     abort(403, 'Unauthorized action.');
+        // }
+
+        try {
+
+            DB::table('product_locations')
+                ->where('product_id', $product_id)
+                ->where('location_id', $location_id)
+                ->update([
+                    'sales_target' => $request->sales_target,
+                    'remaining_target' => $request->remaining_target,
+                ]);
+
+            // $input = $request->only([
+            //     'shipping_details', 'shipping_address',
+            //     'shipping_status', 'delivered_to', 'delivery_person', 'shipping_custom_field_1', 'shipping_custom_field_2', 'shipping_custom_field_3', 'shipping_custom_field_4', 'shipping_custom_field_5',
+            // ]);
+
+
+            // $business_id = $request->session()->get('user.business_id');
+
+            // $transaction = Transaction::where('business_id', $business_id)
+            //                     ->findOrFail($id);
+
+            // $transaction_before = $transaction->replicate();
+
+            // $transaction->update($input);
+
+            // $activity_property = ['update_note' => $request->input('shipping_note', '')];
+            // $this->transactionUtil->activityLog($transaction, 'shipping_edited', $transaction_before, $activity_property);
+
+            $output = ['success' => 1,
+                'msg' => trans('lang_v1.updated_success'),
+            ];
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = ['success' => 0,
+                'msg' => trans('messages.something_went_wrong'),
+            ];
+        }
+
+        return $output;
+    }
+
 
     /**
      * Show the form for creating a new resource.
