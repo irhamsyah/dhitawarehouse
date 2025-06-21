@@ -242,7 +242,7 @@ class AdminSidebarMenu
             }
 
             //Sales Admin dropdown
-            if (in_array('sales_admin', $enabled_modules) && (auth()->user()->can('sales_admin'))) {
+            if ((auth()->user()->can('sales_admin'))) {
                 $menu->dropdown(
                     __('sales_admin.sales_admin'),
                     function ($sub) use ($common_settings) {
