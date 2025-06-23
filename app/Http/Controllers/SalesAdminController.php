@@ -667,7 +667,25 @@ class SalesAdminController extends Controller
 
             // dd($sells->get());
             $sales_order_statuses = Transaction::sales_order_statuses();
-            $datatable = Datatables::of($sells)->editColumn(
+            $datatable = Datatables::of($sells)->addColumn(
+                'action',
+                function ($row){
+                    // dd($row->id);
+                    $html = '<div class="btn-group">
+                                <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info tw-w-max dropdown-toggle" 
+                                    data-toggle="dropdown" aria-expanded="false">'.
+                                    __('messages.actions').
+                                    '<span class="caret"></span><span class="sr-only">Toggle Dropdown
+                                    </span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-left" role="menu">';
+                    $html .= '<li><a href="#" data-href="'.action([\App\Http\Controllers\SalesAdminController::class, 'editSalesmanTarget'], [$row->id]).'" class="btn-modal" data-container=".view_modal"><i class="fas fa-chart-line" aria-hidden="true"></i>'.__('Edit Target Penjualan').'</a></li>';
+                    $html .= '</ul></div>';
+
+                    return $html;
+                }
+            )
+            ->editColumn(
                 'total_paid',
                 '<span class="total-paid" data-orig-value="{{$total_paid}}">@format_currency($total_paid)</span>'
             )
@@ -687,7 +705,7 @@ class SalesAdminController extends Controller
 
             // dd($datatable);
 
-            $rawColumns = ['remaining_target', 'added_by', 'total_paid','first_name','last_name'];
+            $rawColumns = ['action', 'remaining_target', 'added_by', 'total_paid','first_name','last_name'];
 
             // dd($datatable->make(true));
 
@@ -885,7 +903,7 @@ class SalesAdminController extends Controller
     }
 
     /**
-     * Shows modal to edit shipping details.
+     * Shows modal to edit salesman target per product.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -927,7 +945,30 @@ class SalesAdminController extends Controller
     }
 
     /**
-     * Update shipping.
+     * Shows modal to edit salesman terget penjualan.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function editSalesmanTarget($salesman_id)
+    {
+        // dd("bla");
+        $salesman_target = DB::table('users')
+                            ->select(
+                                'users.id',
+                                'users.sales_target',
+                                'users.remaining_target',
+                                DB::raw("CONCAT(COALESCE(users.surname, ''), ' ', COALESCE(users.first_name, ''), ' ', COALESCE(users.last_name, '')) AS sales_name")
+                            )
+                            ->where('users.id', $salesman_id)
+                            ->first();
+        // dd($salesman_target);
+        return view('sales_admin.partials.edit_salesman_target')
+               ->with(compact('salesman_target'));
+    }
+
+    /**
+     * Update sales target per product.
      *
      * @param  Request  $request, int  $id
      * @return \Illuminate\Http\Response
@@ -967,6 +1008,40 @@ class SalesAdminController extends Controller
 
             // $activity_property = ['update_note' => $request->input('shipping_note', '')];
             // $this->transactionUtil->activityLog($transaction, 'shipping_edited', $transaction_before, $activity_property);
+
+            $output = ['success' => 1,
+                'msg' => trans('lang_v1.updated_success'),
+            ];
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = ['success' => 0,
+                'msg' => trans('messages.something_went_wrong'),
+            ];
+        }
+
+        return $output;
+    }
+
+    /**
+     * Update salesman target.
+     *
+     * @param  Request  $request, int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function updateSalesmanTarget(Request $request, $salesman_id)
+    {
+
+        try {
+            $sales_target = ! empty($request->sales_target) ? $this->moduleUtil->num_uf($request->sales_target) : 0;
+            $remaining_target = ! empty($request->remaining_target) ? $this->moduleUtil->num_uf($request->remaining_target) : 0;
+            // dd($sales_target);
+            DB::table('users')
+                ->where('users.id', $salesman_id)
+                ->update([
+                    'sales_target' => $sales_target,
+                    'remaining_target' => $remaining_target,
+                ]);
 
             $output = ['success' => 1,
                 'msg' => trans('lang_v1.updated_success'),

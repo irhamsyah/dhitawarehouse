@@ -21,7 +21,8 @@
                 @endphp
                 <table class="table table-bordered table-striped ajax_view" id="sell_table">
                     <thead>
-                        <tr>                            
+                        <tr>                      
+                            <th class="tw-w-64">@lang('Tindakan')</th>      
                             <th class="tw-w-64">@lang('sales_admin.name')</th>
                             <th class="tw-w-64">@lang('sales_admin.total_sales')</th>
                             <th class="tw-w-64">@lang('sales_admin.remaining_target')</th>  
@@ -108,7 +109,11 @@
                 scrollX: true,
                 scrollCollapse: true,
                 columns: [
-                    
+                    {
+                        data: 'action',
+                        name: 'action',
+                        "searchable": false
+                    },
                     {
                         data: 'added_by',
                         name: 'added_by',

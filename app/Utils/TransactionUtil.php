@@ -5209,6 +5209,7 @@ class TransactionUtil extends Util
                     ->leftJoin('transactions', 'transactions.created_by', '=', 'u.id')
                     ->where('roles.name', 'Sales#1')
                     ->select(
+                        'u.id',
                         'u.first_name',
                         'u.last_name',
                         'u.sales_target',
