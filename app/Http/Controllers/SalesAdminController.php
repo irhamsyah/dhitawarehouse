@@ -826,7 +826,21 @@ class SalesAdminController extends Controller
                     ->select(DB::raw('SUM(transaction_sell_lines.quantity-transaction_sell_lines.quantity_returned) as total_quantity'))
                     ->value('total_quantity'); // gets a single value
 
-                return ((int) ($result ?? 0)) . ' ' . $row->unit_name;
+                // return ((int) ($result ?? 0)) . ' ' . $row->unit_name . ' ' . (($row->sales_target + $row->remaining_target)/$result);
+                $resultValue = (int) ($result ?? 0);
+                $unitName = $row->unit_name;
+
+                // Avoid division by zero and handle edge cases
+                if ($row->sales_target == 0) {
+                    $percentage = 100;
+                } elseif ($resultValue !== 0) {
+                    $percentage =(int) (($resultValue / ($row->sales_target + $row->remaining_target)) * 100);
+                } else {
+                    $percentage = 0;
+                }
+
+                return $resultValue . ' ' . $unitName . ' - ' . number_format($percentage) . '%';
+
             })
             ->editColumn('sales_target', function ($row) use ($location_id) {                
                 return ($row->sales_target + $row->remaining_target). ' ' . $row->unit_name;
