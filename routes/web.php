@@ -227,6 +227,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/sales-admin/edit-target-penjualan/{product_id}/{location_id}', [SalesAdminController::class, 'editSalesTarget']);
     Route::get('/sales-admin/edit-target-salesman/{salesman_id}', [SalesAdminController::class, 'editSalesmanTarget']);
     Route::get('/sales-admin/target-item', [SalesAdminController::class, 'target_item']);
+    Route::get('/sales-admin/sales-visit', [SalesAdminController::class, 'sales_visit']);
+    Route::get('/sales-admin/create-visit', [SalesAdminController::class, 'create_visit']);
     Route::put('sales-admin/update-sales-target/{product_id}/{location_id}', [SalesAdminController::class, 'updateSalesTarget']);
     Route::put('sales-admin/update-salesman-target/{salesman_id}', [SalesAdminController::class, 'updateSalesmanTarget']);
 

@@ -119,6 +119,52 @@ $(document).ready(function() {
             return markup;
         },
     });
+
+    if ($('#customer_id').length) {
+        $('#customer_id').autocomplete({
+            delay: 300,
+            source: function(request, response) {
+                $.getJSON('/contacts/customers', {
+                    q: request.term,
+                    page: 1
+                }, function(data) {
+                    response($.map(data, function(item) {
+                        return {
+                            label: (item.supplier_business_name ? item.supplier_business_name + ' - ' : '') + item.text + ' (' + LANG.mobile + ': ' + item.mobile + ')',
+                            value: item.text,
+                            customer_data: item
+                        };
+                    }));
+                });
+            },
+            minLength: 1,
+            select: function(event, ui) {
+                console.log('Customer selected:', ui.item.customer_data);
+                // Optional: Set customer ID in hidden input or store data elsewhere if needed
+            },
+            focus: function(event, ui) {
+                // Prevent autofill of value on arrow key nav
+                event.preventDefault();
+            }
+        })
+        .autocomplete('instance')._renderItem = function(ul, item) {
+            var $html = '<div>';
+            if (item.customer_data.supplier_business_name) {
+                $html += '<strong>' + item.customer_data.supplier_business_name + '</strong><br>';
+            }
+            $html += item.customer_data.text + '<br>' + LANG.mobile + ': ' + item.customer_data.mobile;
+
+            if (typeof item.customer_data.total_rp !== 'undefined') {
+                var rp = item.customer_data.total_rp || 0;
+                $html += '<br><i class="fa fa-gift text-success"></i> ' + rp;
+            }
+
+            $html += '</div>';
+            return $('<li>').append($html).appendTo(ul);
+        };
+    }
+
+
     $('#customer_id').on('select2:select', function(e) {
         var data = e.params.data;
         if (data.pay_term_number) {
@@ -943,6 +989,19 @@ $(document).ready(function() {
 
     $(document).on('click', '.add_new_customer', function() {
         $('#customer_id').select2('close');
+        var name = $(this).data('name');
+        $('.contact_modal')
+            .find('input#name')
+            .val(name);
+        $('.contact_modal')
+            .find('select#contact_type')
+            .val('customer')
+            .closest('div.contact_type_div')
+            .addClass('hide');
+        $('.contact_modal').modal('show');
+    });
+    $(document).on('click', '.add_new_customer_visit', function() {
+        // $('#customer_id').select2('close');
         var name = $(this).data('name');
         $('.contact_modal')
             .find('input#name')
