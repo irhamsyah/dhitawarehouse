@@ -120,8 +120,8 @@ $(document).ready(function() {
         },
     });
 
-    if ($('#customer_id').length) {
-        $('#customer_id').autocomplete({
+    if ($('#search_customer').length) {
+        $('#search_customer').autocomplete({
             delay: 300,
             source: function(request, response) {
                 $.getJSON('/contacts/customers', {
@@ -138,9 +138,23 @@ $(document).ready(function() {
                 });
             },
             minLength: 1,
+            response: function(event, ui) {
+                if (ui.content.length == 1) {
+                    ui.item = ui.content[0];
+                    $(this)
+                        .data('ui-autocomplete')
+                        ._trigger('select', 'autocompleteselect', ui);
+                    $(this).autocomplete('close');
+
+                } else if (ui.content.length == 0) {
+                    toastr.error('tidak ditemukan');
+                    $('input#search_customer').select();
+                }
+            },
             select: function(event, ui) {
                 console.log('Customer selected:', ui.item.customer_data);
                 // Optional: Set customer ID in hidden input or store data elsewhere if needed
+                customer_row(ui.item.customer_data.id);
             },
             focus: function(event, ui) {
                 // Prevent autofill of value on arrow key nav
@@ -541,6 +555,14 @@ $(document).ready(function() {
 
     //Remove row on click on remove row
     $('table#pos_table tbody').on('click', 'i.pos_remove_row', function() {
+        $(this)
+            .parents('tr')
+            .remove();
+        pos_total_row();
+    });
+
+    //Remove row on click on remove row
+    $('table#customer_table tbody').on('click', 'i.pos_remove_row', function() {
         $(this)
             .parents('tr')
             .remove();
@@ -1824,6 +1846,39 @@ function pos_product_row(variation_id = null, purchase_line_id = null, weighing_
             },
         });
     }
+}
+
+function customer_row(customer_id = null) {
+        
+        $.ajax({
+            method: 'GET',
+            url: '/contacts/get_customer_row/' + customer_id,
+            async: false,
+            data: {
+            },
+            dataType: 'json',
+            success: function(result) {
+                alert(result.html_content);
+                // content = ''
+                $('table#customer_table tbody').append(result.html_content);
+                if (result.success) {
+                    alert(result.html_content);
+                    console.log(result.html_content);
+                    $('table#customer_table tbody')
+                        .append(result.html_content);
+
+                    $('input#search_customer')
+                        .focus()
+                        .select();
+                } else {hp
+                    toastr.error(result.msg);
+                    $('input#search_customer')
+                        .focus()
+                        .select();
+                }
+            },
+        });
+    // }
 }
 
 //Update values for each row

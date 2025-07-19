@@ -180,7 +180,7 @@
 						}
 					@endphp
 					<div class="table-responsive">
-					<table class="table table-condensed table-bordered table-striped table-responsive" id="pos_table">
+					<table class="table table-condensed table-bordered table-striped table-responsive" id="customer_table">
 						<thead>
 							<tr>
 								<th class="text-center">#</th>
@@ -218,7 +218,7 @@
 							</span> -->
 							{!! Form::text('contact_id', null, [
 								'class' => 'form-control mousetrap',
-								'id' => 'customer_id',
+								'id' => 'search_customer',
 								'placeholder' => 'Enter Customer name / phone',
 								'required' => true
 							]) !!}
