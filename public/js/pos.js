@@ -1858,7 +1858,7 @@ function customer_row(customer_id = null) {
             },
             dataType: 'json',
             success: function(result) {
-                alert(result.html_content);
+                // alert(result.html_content);
                 // content = ''
                 $('table#customer_table tbody').append(result.html_content);
                 if (result.success) {
