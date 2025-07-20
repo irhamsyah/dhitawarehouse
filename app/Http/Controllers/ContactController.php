@@ -966,6 +966,44 @@ class ContactController extends Controller
     }
 
     /**
+     * Returns the HTML row for a customer in sales visit
+     *
+     * @param  int  $customer_id
+     * @return \Illuminate\Http\Response
+     */
+    public function getCustomerRow($vcustomerid)
+    {
+        $output = [];
+        $business_id = request()->session()->get('user.business_id');
+        $row_count = request()->get('customer_row');
+        $row_count = $row_count + 1;
+        try {
+            $contact = Contact::where('contacts.business_id', $business_id)
+                        ->where('contacts.id', $vcustomerid)
+                        ->leftJoin('customer_groups as cg', 'cg.id', '=', 'contacts.customer_group_id')
+                        ->active()
+                        ->select('contacts.*') // <- Important to avoid "id is null" issue
+                        ->first();
+
+            // $contact = $contact->get();
+            // dd(json_encode($contact));
+            $output['html_content'] = view('sales_admin.customer_row')
+                ->with(compact('contact', 'row_count'))
+                ->render();
+            $output['success'] = true;
+            // $output = $this->getSellLineRow($variation_id, $location_id, $quantity, $row_count, $is_direct_sell, $is_serial_no);
+
+        } catch (\Exception $e) {
+            \Log::emergency('File:' . $e->getFile() . 'Line:' . $e->getLine() . 'Message:' . $e->getMessage());
+
+            $output['success'] = false;
+            $output['msg'] = __('terjadi kesalahan!');
+        }
+
+        return $output;
+    }
+
+    /**
      * Checks if the given contact id already exist for the current business.
      *
      * @param  \Illuminate\Http\Request  $request

@@ -5272,6 +5272,32 @@ class TransactionUtil extends Util
     }
 
     /**
+     * common function to get
+     * list sales visit
+     *
+     * @param  int  $business_id
+     * @return object
+     */
+    public function getAllSalesVisit()
+    {
+
+        $sales_visit = DB::table('sales_visit as sv')
+                            ->leftJoin('users as s', 'sv.sales_id', '=', 's.id')
+                            ->leftJoin('contacts as c', 'sv.customer_id', '=', 'c.id')
+                            ->select('sv.*', 
+                                        'sv.visit_date as visit_date', 
+                                        's.id as sales_id', 
+                                        's.first_name as sales_first_name', 
+                                        'c.first_name as customer_first_name',
+                                        'c.address_line_1 as customer_address',
+                                        'c.mobile as customer_mobile',
+                                        's.*', 'c.*');
+
+        // dd($sales_visit);
+        return $sales_visit;
+    }
+
+    /**
      * Function to get ledger details
      */
     public function getLedgerDetails($contact_id, $start, $end, $format = 'format_1', $location_id = null, $line_details = false)

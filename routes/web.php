@@ -152,6 +152,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/contacts/import', [ContactController::class, 'postImportContacts']);
     Route::post('/contacts/check-contacts-id', [ContactController::class, 'checkContactId']);
     Route::get('/contacts/customers', [ContactController::class, 'getCustomers']);
+    Route::get('/contacts/get_customer_row/{customer_id}', [ContactController::class, 'getCustomerRow']);
     Route::resource('contacts', ContactController::class);
 
     Route::get('taxonomies-ajax-index-page', [TaxonomyController::class, 'getTaxonomyIndexPage']);
@@ -247,6 +248,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
     Route::resource('pos', SellPosController::class);
     Route::resource('sales-admin-pos', SellSalesPosController::class);
+    Route::post('/sales-admin/sales-visit', [SellSalesPosController::class, 'store_sales_visit']);
 
     Route::resource('roles', RoleController::class);
 

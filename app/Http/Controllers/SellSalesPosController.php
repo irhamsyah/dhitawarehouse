@@ -62,7 +62,7 @@ use Razorpay\Api\Api;
 use Stripe\Charge;
 use Stripe\Stripe;
 use Yajra\DataTables\Facades\DataTables;
-use App\Events\SellCreatedOrModified;
+use App\Events\SellCreatedOrModified; 
 
 class SellSalesPosController extends Controller
 {
@@ -298,6 +298,44 @@ class SellSalesPosController extends Controller
     }
 
     /**
+     * Store sales visit resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store_sales_visit(Request $request)
+    {
+        $input = $request->except('_token');
+        // dd($input); 
+        $visitDate = \Carbon::createFromFormat('m/d/Y H:i', $input['transaction_date']);
+        try{
+            DB::beginTransaction();
+            
+            foreach ($input['customers'] as $visitData) {
+                DB::table('sales_visit')->insert([
+                    'sales_id'    => $input['selected_salesman'],
+                    'customer_id' => $visitData['contact_id'],
+                    'visit_date'  => $visitDate,
+                    'created_at'  => now(),
+                    'updated_at'  => now(),
+                ]);
+            }
+            DB::commit();
+            $msg = "Data kunjungan berhasil ditambahkan!";
+            $output = ['success' => 1, 'msg' => $msg];
+        }catch (\Exception $e) {
+            DB::rollBack();
+            $msg = trans('messages.something_went_wrong');
+            $output = ['success' => 0,
+                'msg' => $msg,
+            ];
+        }
+        return redirect()
+            ->action([\App\Http\Controllers\SalesAdminController::class, 'sales_visit'])
+            ->with('status', $output);
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -323,6 +361,7 @@ class SellSalesPosController extends Controller
         try {
             $input = $request->except('_token');
             // dd($input['selected_salesman']);
+            // dd($input);
             $input['is_quotation'] = 0;
             //status is send as quotation from Add sales screen.
             if ($input['status'] == 'quotation') {
