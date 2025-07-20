@@ -68,6 +68,7 @@
 	</div>
 </div>
 @endif -->
+{!! Form::open(['url' => action([\App\Http\Controllers\SellSalesPosController::class, 'store_sales_visit']), 'method' => 'post', 'id' => 'add_sell_form', 'files' => true ]) !!}
 <div class="row">
 <div class="@if(!empty($commission_agent)) col-sm-3 @else col-sm-4 @endif">
 	<div class="form-group">
@@ -86,7 +87,7 @@
 	$common_settings = session()->get('business.common_settings');
 @endphp
 <input type="hidden" id="item_addition_method" value="{{$business_details->item_addition_method}}">
-	{!! Form::open(['url' => action([\App\Http\Controllers\SellSalesPosController::class, 'store']), 'method' => 'post', 'id' => 'add_sell_form', 'files' => true ]) !!}
+	
 	 @if(!empty($sale_type))
 	 	<input type="hidden" id="sale_type" name="type" value="{{$sale_type}}">
 	 @endif
@@ -170,8 +171,8 @@
 
 					<input type="hidden" name="sell_price_tax" id="sell_price_tax" value="{{$business_details->sell_price_tax}}">
 
-					<!-- Keeps count of product rows -->
-					<input type="hidden" id="product_row_count" 
+					<!-- Keeps count of cutomer rows -->
+					<input type="hidden" id="customer_row_count" 
 						value="0">
 					@php
 						$hide_tax = '';
@@ -570,8 +571,8 @@
 	<div class="row">
 		{!! Form::hidden('is_save_and_print', 0, ['id' => 'is_save_and_print']); !!}
 		<div class="col-sm-12 text-center tw-mt-4">
-			<button type="button" id="submit-sell" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white">@lang('messages.save')</button>
-			<button type="button" id="save-and-print" class="tw-dw-btn tw-dw-btn-success tw-dw-btn-lg tw-text-white">@lang('lang_v1.save_and_print')</button>
+			<button type="button" id="submit-visit" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white">@lang('messages.save')</button>
+			<!-- <button type="button" id="save-and-print" class="tw-dw-btn tw-dw-btn-success tw-dw-btn-lg tw-text-white">@lang('lang_v1.save_and_print')</button> -->
 		</div>
 	</div>
 	

@@ -248,6 +248,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
     Route::resource('pos', SellPosController::class);
     Route::resource('sales-admin-pos', SellSalesPosController::class);
+    Route::post('/sales-admin/sales-visit', [SellSalesPosController::class, 'store_sales_visit']);
 
     Route::resource('roles', RoleController::class);
 

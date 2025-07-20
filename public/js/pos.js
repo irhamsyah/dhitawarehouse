@@ -1137,6 +1137,15 @@ $(document).ready(function() {
     }
     sell_form_validator = sell_form.validate();
 
+    $('button#submit-visit').click(function(e) {
+        //Check if product is present or not.
+        // if ($('table#pos_table tbody').find('.product_row').length <= 0) {
+        //     toastr.warning(LANG.no_products_added);
+        //     return false;
+        // }
+        sell_form.submit();
+    });
+
     $('button#submit-sell, button#save-and-print').click(function(e) {
         //Check if product is present or not.
         if ($('table#pos_table tbody').find('.product_row').length <= 0) {
@@ -1849,28 +1858,31 @@ function pos_product_row(variation_id = null, purchase_line_id = null, weighing_
 }
 
 function customer_row(customer_id = null) {
-        
+        var customer_row = $('input#customer_row_count').val();
         $.ajax({
             method: 'GET',
             url: '/contacts/get_customer_row/' + customer_id,
             async: false,
             data: {
+                customer_row: customer_row,
             },
             dataType: 'json',
             success: function(result) {
                 // alert(result.html_content);
                 // content = ''
-                $('table#customer_table tbody').append(result.html_content);
+                // $('table#customer_table tbody').append(result.html_content);
                 if (result.success) {
-                    alert(result.html_content);
+                    // alert(result.html_content);
                     console.log(result.html_content);
                     $('table#customer_table tbody')
                         .append(result.html_content);
-
+                    //increment row count
+                    $('input#customer_row_count').val(parseInt(customer_row) + 1);
+                    update_customer_serial_no();
                     $('input#search_customer')
                         .focus()
                         .select();
-                } else {hp
+                } else {
                     toastr.error(result.msg);
                     $('input#search_customer')
                         .focus()
@@ -3313,6 +3325,16 @@ $(document).on('change', '#res_waiter_id', function(e){
 // update serial number of product item
 function update_serial_no(){
     $('.product_row').each(function (index) {
+        // Add the serial number to the first <td> of each row (index + 1 to start from 1)
+        if ($(this).find('td:first').hasClass('serial_no')) {
+            $(this).find('td:first').text(index + 1);
+        }
+    });
+}
+
+// update serial number of product item
+function update_customer_serial_no(){
+    $('.customer_row').each(function (index) {
         // Add the serial number to the first <td> of each row (index + 1 to start from 1)
         if ($(this).find('td:first').hasClass('serial_no')) {
             $(this).find('td:first').text(index + 1);

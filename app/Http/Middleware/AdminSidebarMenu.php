@@ -277,6 +277,12 @@ class AdminSidebarMenu
                                 __('Jadwal Kunjungan Sales'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'sales-visit' && empty(request()->get('status'))]
                             );
+
+                            $sub->url(
+                                action([\App\Http\Controllers\SalesAdminController::class, 'create_visit']),
+                                __('Tambah Kunjungan Sales'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'create-visit' && empty(request()->get('status'))]
+                            );
                         
                     },
                     ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">

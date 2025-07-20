@@ -975,6 +975,8 @@ class ContactController extends Controller
     {
         $output = [];
         $business_id = request()->session()->get('user.business_id');
+        $row_count = request()->get('customer_row');
+        $row_count = $row_count + 1;
         try {
             $contact = Contact::where('contacts.business_id', $business_id)
                         ->where('contacts.id', $vcustomerid)
@@ -986,8 +988,9 @@ class ContactController extends Controller
             // $contact = $contact->get();
             // dd(json_encode($contact));
             $output['html_content'] = view('sales_admin.customer_row')
-                ->with(compact('contact'))
+                ->with(compact('contact', 'row_count'))
                 ->render();
+            $output['success'] = true;
             // $output = $this->getSellLineRow($variation_id, $location_id, $quantity, $row_count, $is_direct_sell, $is_serial_no);
 
         } catch (\Exception $e) {
