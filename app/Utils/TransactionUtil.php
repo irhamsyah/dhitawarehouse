@@ -5288,6 +5288,7 @@ class TransactionUtil extends Util
                                         'sv.visit_date as visit_date', 
                                         's.id as sales_id', 
                                         's.first_name as sales_first_name', 
+                                        'c.id as customer_id',
                                         'c.first_name as customer_first_name',
                                         'c.address_line_1 as customer_address',
                                         'c.mobile as customer_mobile',

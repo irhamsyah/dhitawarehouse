@@ -797,13 +797,43 @@ class SalesAdminController extends Controller
                     // Format: 20-July-2025
                     return Carbon::parse($row->visit_date)->format('d-F-Y');
                 })
+                ->addColumn('customer_status', function ($row) use ($business_id) {
+                    // Query for this specific customer
+                    $summary = DB::table('transactions')
+                        ->where('transactions.business_id', $business_id)
+                        ->where('transactions.type', 'sell')
+                        ->where('transactions.contact_id', $row->customer_id)
+                        ->select(
+                            DB::raw('COUNT(*) as total_transactions'),
+                            DB::raw('SUM(final_total) as total_sales'),
+                            DB::raw('MAX(transaction_date) as latest_transaction_date'),
+                            DB::raw('SUM((
+                                SELECT SUM(IF(tp.is_return = 1, -1 * tp.amount, tp.amount)) 
+                                FROM transaction_payments as tp 
+                                WHERE tp.transaction_id = transactions.id
+                            )) as total_paid')
+                        )
+                        ->first();
+
+                    // Fallback defaults if no transactions
+                    $total_transactions = $summary->total_transactions ?? 0;
+
+                    // Define status
+                    if ($total_transactions > 2) {
+                        return '<span class="badge bg-light-green">Pelanggan</span>';
+                    } elseif ($total_transactions == 1) {
+                        return '<span class="badge bg-yellow">Baru</span>';
+                    } else {
+                        return '<span class="badge bg-secondary">Prospek</span>';
+                    }
+                })
                 ->filterColumn('customer_first_name', function ($query, $keyword) {
                     $query->where(function ($q) use ($keyword) {
                         $q->where('c.first_name', 'like', "%{$keyword}%");
                     });
                 });
 
-            $rawColumns = ['action', 'status', 'visit_date', 'customer_first_name', 'customer_address', 'customer_mobile'];
+            $rawColumns = ['customer_status', 'status', 'visit_date', 'customer_first_name', 'customer_address', 'customer_mobile'];
             // dd($sells);
             // $datatable = DataTables::of($sells); 
             // dd($datatable);

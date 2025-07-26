@@ -47,6 +47,7 @@
                             <th>@lang('Alamat')</th>
                             <th>@lang('lang_v1.contact_no')</th>
                             <th>@lang('Status Kunjungan')</th>
+                            <th>@lang('Status Pelanggan')</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -166,6 +167,11 @@
                     },
                     {
                         data: 'status',
+                        name: 'status',
+                        "searchable": false
+                    },
+                    {
+                        data: 'customer_status',
                         name: 'status',
                         "searchable": false
                     },
