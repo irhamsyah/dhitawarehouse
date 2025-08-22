@@ -817,7 +817,7 @@ class SalesAdminController extends Controller
 
                     // Fallback defaults if no transactions
                     $total_transactions = $summary->total_transactions ?? 0;
-
+                    //echo $total_transactions;
                     // Define status
                     if ($total_transactions > 2) {
                         return '<span class="badge bg-light-green">Pelanggan</span>';

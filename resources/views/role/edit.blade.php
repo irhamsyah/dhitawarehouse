@@ -61,18 +61,78 @@
                   </label>
                 </div>
               </div>
-
-              <div class="col-md-12">
-                <div class="checkbox">
-                  <label>
-                    {!! Form::checkbox('permissions[]', 'sales_admin', in_array('sales_admin', $role_permissions), 
-                    [ 'class' => 'input-icheck']); !!} {{ __( 'sales_admin.sales_admin' ) }}
-                  </label>
-                </div>
-              </div>
           </div>
         </div>
         <hr>
+
+        @if(in_array('sales_admin', $enabled_modules))           
+            <div class="row check_group">
+                <div class="col-md-1">
+                  <h4>@lang( 'Admin Sales' )</h4>
+                </div>
+            
+                <div class="col-md-2">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" class="check_all input-icheck" > {{ __( 'role.select_all' ) }}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="col-md-9">                  
+                  
+                <div class="col-md-12">
+                  <div class="checkbox">
+                    <label>
+                      {!! Form::checkbox('permissions[]', 'sales_admin.all_sales', in_array('sales_admin.all_sales', $role_permissions),
+                      [ 'class' => 'input-icheck']); !!} {{ __( 'Semua Penjualan' ) }}
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="checkbox">
+                    <label>
+                      {!! Form::checkbox('permissions[]', 'sales_admin.add_sales', in_array('sales_admin.add_sales', $role_permissions),
+                      [ 'class' => 'input-icheck']); !!} {{ __( 'Tambah Penjualan' ) }}
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="checkbox">
+                    <label>
+                      {!! Form::checkbox('permissions[]', 'sales_admin.sales_target', in_array('sales_admin.sales_target', $role_permissions),
+                      [ 'class' => 'input-icheck']); !!} {{ __( 'Target Penjualan' ) }}
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="checkbox">
+                    <label>
+                      {!! Form::checkbox('permissions[]', 'sales_admin.product_sales_target', in_array('sales_admin.product_sales_target', $role_permissions),
+                      [ 'class' => 'input-icheck']); !!} {{ __( 'Target Penjualan Produk' ) }}
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="checkbox">
+                    <label>
+                      {!! Form::checkbox('permissions[]', 'sales_admin.sales_visit', in_array('sales_admin.sales_visit', $role_permissions),
+                      [ 'class' => 'input-icheck']); !!} {{ __( 'Jadwal Kunjungan Sales' ) }}
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="checkbox">
+                    <label>
+                      {!! Form::checkbox('permissions[]', 'sales_admin.add_sales_visit', in_array('sales_admin.add_sales_visit', $role_permissions),
+                      [ 'class' => 'input-icheck']); !!} {{ __( 'Tambah Kunjungan Sales' ) }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr>
+        @endif
 
         <div class="row check_group">
         <div class="col-md-1">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\User;
 use App\Utils\ModuleUtil;
 use Closure;
 use Menu;
@@ -240,50 +241,55 @@ class AdminSidebarMenu
                   </svg>', 'id' => 'tour_step5']
                 )->order(20);
             }
-
+            
             //Sales Admin dropdown
-            if ((auth()->user()->can('sales_admin'))) {
+            if (in_array('sales_admin', $enabled_modules)) {
                 $menu->dropdown(
                     __('sales_admin.sales_admin'),
                     function ($sub) use ($common_settings) {
                         
-                        
+                        if (auth()->user()->can('sales_admin.all_sales')) {
                             $sub->url(
                                 action([\App\Http\Controllers\SalesAdminController::class, 'index']),
                                 __('lang_v1.all_sales'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == null]
                             );
-
+                        }
+                        if (auth()->user()->can('sales_admin.add_sales')) {
                             $sub->url(
                                 action([\App\Http\Controllers\SalesAdminController::class, 'create']),
                                 __('sale.add_sale'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'create' && empty(request()->get('status'))]
                             );
-
+                        }
+                        if (auth()->user()->can('sales_admin.sales_target')) {
                             $sub->url(
                                 action([\App\Http\Controllers\SalesAdminController::class, 'target_penjualan']),
                                 __('lang_v1.sales_target'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'target-penjualan' && empty(request()->get('status'))]
                             );
-
+                        }
+                        if (auth()->user()->can('sales_admin.product_sales_target')) {
                             $sub->url(
                                 action([\App\Http\Controllers\SalesAdminController::class, 'target_item']),
                                 __('lang_v1.sales_target_item'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'target-item' && empty(request()->get('status'))]
                             );
-
+                        }
+                        if (auth()->user()->can('sales_admin.sales_visit')) {
                             $sub->url(
                                 action([\App\Http\Controllers\SalesAdminController::class, 'sales_visit']),
                                 __('Jadwal Kunjungan Sales'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'sales-visit' && empty(request()->get('status'))]
                             );
-
+                        }
+                        if (auth()->user()->can('sales_admin.add_sales_visit')) {
                             $sub->url(
                                 action([\App\Http\Controllers\SalesAdminController::class, 'create_visit']),
                                 __('Tambah Kunjungan Sales'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'create-visit' && empty(request()->get('status'))]
                             );
-                        
+                        }
                     },
                     ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -295,6 +301,12 @@ class AdminSidebarMenu
                 )->order(25);
             }
 
+            $business_id = request()->session()->get('user.business_id');
+            $user = User::where('business_id', $business_id)
+                        ->with(['contactAccess'])
+                        ->findOrFail(auth()->user()->id);
+            
+            // dd($user->roles->first()->name);
             //Purchase dropdown
             if (in_array('purchases', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create') || auth()->user()->can('purchase.update'))) {
                 $menu->dropdown(
@@ -347,7 +359,7 @@ class AdminSidebarMenu
                 )->order(25);
             }
             //Sell dropdown
-            if ($is_admin || auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping', 'access_sell_return', 'direct_sell.view', 'direct_sell.update', 'access_own_sell_return'])) {
+            if ($is_admin || (auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping', 'access_sell_return', 'direct_sell.view', 'direct_sell.update', 'access_own_sell_return']) && $user->roles->first()->name=="Cashier#1")) {
                 $menu->dropdown(
                     __('sale.sale'),
                     function ($sub) use ($enabled_modules, $is_admin, $pos_settings) {
