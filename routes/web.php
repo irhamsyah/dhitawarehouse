@@ -5,6 +5,7 @@ use App\Http\Controllers\AccountReportsController;
 use App\Http\Controllers\AccountTypeController;
 // use App\Http\Controllers\Auth;
 use App\Http\Controllers\BackUpController;
+use App\Http\Controllers\PenerimaanController;
 use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\BusinessController;
@@ -211,6 +212,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/purchases/get_purchase_entry_row', [PurchaseController::class, 'getPurchaseEntryRow']);
     Route::post('/purchases/check_ref_number', [PurchaseController::class, 'checkRefNumber']);
     Route::resource('purchases', PurchaseController::class)->except(['show']);
+
+    Route::resource('penerimaan', PenerimaanController::class)->except(['show']);
 
     Route::get('/toggle-subscription/{id}', [SellPosController::class, 'toggleRecurringInvoices']);
     Route::post('/sells/pos/get-types-of-service-details', [SellPosController::class, 'getTypesOfServiceDetails']);

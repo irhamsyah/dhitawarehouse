@@ -306,6 +306,43 @@ class AdminSidebarMenu
                         ->with(['contactAccess'])
                         ->findOrFail(auth()->user()->id);
             
+            //Penerimaan dropdown
+            if (in_array('penerimaan', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create') || auth()->user()->can('purchase.update'))) {
+                $menu->dropdown(
+                    __('Penerimaan'),
+                    function ($sub) use ($common_settings) {
+                        if (auth()->user()->can('purchase.view') || auth()->user()->can('view_own_purchase')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\PenerimaanController::class, 'index']),
+                                __('Daftar Penerimaan'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'penerimaan' && request()->segment(2) == null]
+                            );
+                        }
+                        if (auth()->user()->can('purchase.create')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\PenerimaanController::class, 'create']),
+                                __('Tambah Penerimaan'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'penerimaan' && request()->segment(2) == 'create']
+                            );
+                        }
+                        // if (auth()->user()->can('purchase.update')) {
+                        //     $sub->url(
+                        //         action([\App\Http\Controllers\PurchaseReturnController::class, 'index']),
+                        //         __('Retur Penerimaan    '),
+                        //         ['icon' => '', 'active' => request()->segment(1) == 'purchase-return']
+                        //     );
+                        // }
+                    },
+                    ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M12 3v12"></path>
+                    <path d="M16 11l-4 4l-4 -4"></path>
+                    <path d="M3 12a9 9 0 0 0 18 0"></path>
+                  </svg>', 'id' => 'tour_step6']
+                )->order(25);
+            }
+                        
             // dd($user->roles->first()->name);
             //Purchase dropdown
             if (in_array('purchases', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create') || auth()->user()->can('purchase.update'))) {
