@@ -258,19 +258,19 @@
 								<th>@lang( 'product.product_name' )</th>
 								<th>@lang( 'purchase.purchase_quantity' )</th>
 								<th>@lang( 'lang_v1.unit_cost_before_discount' )</th>
-								<th>@lang( 'lang_v1.discount_percent' )</th>
-								<th>@lang( 'purchase.unit_cost_before_tax' )</th>
+								<!-- <th>@lang( 'lang_v1.discount_percent' )</th> -->
+								<!-- <th>@lang( 'purchase.unit_cost_before_tax' )</th> -->
 								<th class="{{$hide_tax}}">@lang( 'purchase.subtotal_before_tax' )</th>
 								<th class="{{$hide_tax}}">@lang( 'purchase.product_tax' )</th>
 								<th class="{{$hide_tax}}">@lang( 'purchase.net_cost' )</th>
 								<th>@lang( 'purchase.line_total' )</th>
-								<th class="@if(!session('business.enable_editing_product_from_purchase')) hide @endif">
+								<!-- <th class="@if(!session('business.enable_editing_product_from_purchase')) hide @endif">
 									@lang( 'lang_v1.profit_margin' )
-								</th>
-								<th>
+								</th> -->
+								<!-- <th>
 									@lang( 'purchase.unit_selling_price' )
 									<small>(@lang('product.inc_of_tax'))</small>
-								</th>
+								</th> -->
 								@if(session('business.enable_lot_number'))
 									<th>
 										@lang('lang_v1.lot_number')
@@ -547,8 +547,8 @@
 			</div>
 		</div>
 	@endcomponent
-	@component('components.widget', ['class' => 'box-primary', 'title' => __('purchase.add_payment')])
-		<div class="box-body payment_row">
+	@component('components.widget', ['class' => 'box-primary', 'title' => __('Tambahkan Penerimaan')])
+		<!-- <div class="box-body payment_row">
 			<div class="row">
 				<div class="col-md-12">
 					<strong>@lang('lang_v1.advance_balance'):</strong> <span id="advance_balance_text">0</span>
@@ -562,13 +562,13 @@
 					<div class="pull-right"><strong>@lang('purchase.payment_due'):</strong> <span id="payment_due">0.00</span></div>
 				</div>
 			</div>
-			<br>
+			<br> -->
 			<div class="row">
 				<div class="col-sm-12 text-center">
 					<button type="button" id="submit_purchase_form" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white">@lang('messages.save')</button>
 				</div>
 			</div>
-		</div>
+		<!-- </div> -->
 	@endcomponent
 
 {!! Form::close() !!}

@@ -1,4 +1,4 @@
-<table class="table table-bordered table-striped ajax_view" id="purchase_table" style="width: 100%;">
+<table class="table table-bordered table-striped ajax_view" id="penerimaan_table" style="width: 100%;">
     <thead>
         <tr>
             <th>@lang('messages.action')</th>
