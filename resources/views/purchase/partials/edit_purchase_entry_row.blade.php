@@ -14,7 +14,7 @@
                 <th>#</th>
                 <th>@lang( 'product.product_name' )</th>
                 <th>@if(empty($is_purchase_order)) @lang( 'purchase.purchase_quantity' ) @else @lang( 'lang_v1.order_quantity' ) @endif</th>
-                <th>@lang( 'lang_v1.unit_cost_before_discount' )</th>
+                <th>@lang( 'Modal Satuan' )</th>
                 <!-- <th>@lang( 'lang_v1.discount_percent' )</th> -->
                 <!-- <th>@lang( 'purchase.unit_cost_before_tax' )</th> -->
                 <th class="{{$hide_tax}}">@lang( 'purchase.subtotal_before_tax' )</th>

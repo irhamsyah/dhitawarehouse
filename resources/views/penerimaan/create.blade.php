@@ -22,7 +22,7 @@
 
 	@include('layouts.partials.error')
 
-	{!! Form::open(['url' => action([\App\Http\Controllers\PurchaseController::class, 'store']), 'method' => 'post', 'id' => 'add_purchase_form', 'files' => true ]) !!}
+	{!! Form::open(['url' => action([\App\Http\Controllers\PenerimaanController::class, 'store']), 'method' => 'post', 'id' => 'add_purchase_form', 'files' => true ]) !!}
 	@component('components.widget', ['class' => 'box-primary'])
 		<div class="row">
 			<div class="@if(!empty($default_purchase_status)) col-sm-4 @else col-sm-3 @endif">
@@ -257,7 +257,7 @@
 								<th>#</th>
 								<th>@lang( 'product.product_name' )</th>
 								<th>@lang( 'purchase.purchase_quantity' )</th>
-								<th>@lang( 'lang_v1.unit_cost_before_discount' )</th>
+								<th>@lang( 'Modal Satuan' )</th>
 								<!-- <th>@lang( 'lang_v1.discount_percent' )</th> -->
 								<!-- <th>@lang( 'purchase.unit_cost_before_tax' )</th> -->
 								<th class="{{$hide_tax}}">@lang( 'purchase.subtotal_before_tax' )</th>
