@@ -257,7 +257,7 @@
 								<th>#</th>
 								<th>@lang( 'product.product_name' )</th>
 								<th>@lang( 'purchase.purchase_quantity' )</th>
-								<th>@lang( 'Modal Satuan' )</th>
+								<th>@lang( 'Harga' )</th>
 								<!-- <th>@lang( 'lang_v1.discount_percent' )</th> -->
 								<!-- <th>@lang( 'purchase.unit_cost_before_tax' )</th> -->
 								<th class="{{$hide_tax}}">@lang( 'purchase.subtotal_before_tax' )</th>
