@@ -122,12 +122,13 @@
                     required>
                 @endif
             </td>
-            <!-- <td>
-                {!! Form::text('purchases[' . $loop->index . '][pp_without_discount]', number_format($purchase_line->pp_without_discount/$purchase->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm purchase_unit_cost_without_discount input_number', 'required']); !!}
-            </td> -->
-            <!-- <td>
-                {!! Form::text('purchases[' . $loop->index . '][discount_percent]', number_format($purchase_line->discount_percent, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm inline_discounts input_number', 'required']); !!} <b>%</b>
-            </td> -->
+            <!-- <td> -->
+                {!! Form::text('purchases[' . $loop->index . '][pp_without_discount]', number_format($purchase_line->pp_without_discount/$purchase->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control hidden input-sm purchase_unit_cost_without_discount input_number', 'required']); !!}
+            <!-- </td> -->
+            <!-- <td> -->
+                {!! Form::text('purchases[' . $loop->index . '][discount_percent]', number_format($purchase_line->discount_percent, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control hidden input-sm inline_discounts input_number', 'required']); !!} 
+                <!-- <b>%</b> -->
+            <!-- </td> -->
             <td>
                 {!! Form::text('purchases[' . $loop->index . '][purchase_price]', 
                 number_format($purchase_line->purchase_price/$purchase->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm purchase_unit_cost input_number', 'required']); !!}

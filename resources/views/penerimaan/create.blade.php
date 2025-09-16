@@ -548,27 +548,30 @@
 		</div>
 	@endcomponent
 	@component('components.widget', ['class' => 'box-primary', 'title' => __('Tambahkan Penerimaan')])
-		<!-- <div class="box-body payment_row">
-			<div class="row">
+		<div class="box-body payment_row">
+			<div class="row hidden">
 				<div class="col-md-12">
 					<strong>@lang('lang_v1.advance_balance'):</strong> <span id="advance_balance_text">0</span>
 					{!! Form::hidden('advance_balance', null, ['id' => 'advance_balance', 'data-error-msg' => __('lang_v1.required_advance_balance_not_available')]); !!}
 				</div>
 			</div>
-			@include('sale_pos.partials.payment_row_form', ['row_index' => 0, 'show_date' => true, 'show_denomination' => true])
+			<div class="row hidden">
+				@include('sale_pos.partials.payment_row_form', ['row_index' => 1, 'show_date' => true, 'show_denomination' => true])
+			</div>
+			<!-- @include('sale_pos.partials.payment_row_form', ['row_index' => 0, 'show_date' => true, 'show_denomination' => true]) -->
 			<hr>
-			<div class="row">
+			<div class="row hidden">
 				<div class="col-sm-12">
 					<div class="pull-right"><strong>@lang('purchase.payment_due'):</strong> <span id="payment_due">0.00</span></div>
 				</div>
 			</div>
-			<br> -->
+			<br>
 			<div class="row">
 				<div class="col-sm-12 text-center">
 					<button type="button" id="submit_purchase_form" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white">@lang('messages.save')</button>
 				</div>
 			</div>
-		<!-- </div> -->
+		</div>
 	@endcomponent
 
 {!! Form::close() !!}
