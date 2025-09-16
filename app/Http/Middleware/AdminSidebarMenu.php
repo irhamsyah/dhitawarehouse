@@ -305,6 +305,43 @@ class AdminSidebarMenu
             $user = User::where('business_id', $business_id)
                         ->with(['contactAccess'])
                         ->findOrFail(auth()->user()->id);
+
+            //Hutang / Ingon2 dropdown
+            if (in_array('hutang_ingon', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create') || auth()->user()->can('purchase.update'))) {
+                $menu->dropdown(
+                    __('Hutang / Ingon2'),
+                    function ($sub) use ($enabled_modules, $is_admin) {
+                        if ($is_admin || auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'direct_sell.view', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping'])) {
+                            $sub->url(
+                                action([\App\Http\Controllers\SellController::class, 'index']),
+                                __('Daftar Transaksi'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'sells' && request()->segment(2) == null]
+                            );
+                        }
+                        if (in_array('add_sale', $enabled_modules) && auth()->user()->can('direct_sell.access')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\SellController::class, 'create']),
+                                __('Tambah Transaksi'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'sells' && request()->segment(2) == 'create' && empty(request()->get('status'))]
+                            );
+                        }
+                        // if (auth()->user()->can('purchase.update')) {
+                        //     $sub->url(
+                        //         action([\App\Http\Controllers\PurchaseReturnController::class, 'index']),
+                        //         __('Retur Penerimaan    '),
+                        //         ['icon' => '', 'active' => request()->segment(1) == 'purchase-return']
+                        //     );
+                        // }
+                    },
+                    ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M12 3v12"></path>
+                    <path d="M16 11l-4 4l-4 -4"></path>
+                    <path d="M3 12a9 9 0 0 0 18 0"></path>
+                  </svg>', 'id' => 'tour_step6']
+                )->order(25);
+            }
             
             //Penerimaan dropdown
             if (in_array('penerimaan', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create') || auth()->user()->can('purchase.update'))) {

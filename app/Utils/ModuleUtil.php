@@ -470,6 +470,7 @@ class ModuleUtil extends Util
     public function availableModules()
     {
         return [
+            'hutang_ingon' => ['name' => __('Hutang / Ingon2')],
             'penerimaan' => ['name' => __('Penerimaan')],
             'sales_admin' => ['name' => __('sales_admin.sales_admin')],
             'purchases' => ['name' => __('purchase.purchases')],
