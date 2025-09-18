@@ -631,7 +631,7 @@ class HutangController extends Controller
         $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
 
 
-        return view('sell.index')
+        return view('hutang_ingon2.index')
         ->with(compact('business_locations', 'customers', 'is_woocommerce', 'sales_representative', 'is_cmsn_agent_enabled', 'commission_agents', 'service_staffs', 'is_tables_enabled', 'is_service_staff_enabled', 'is_types_service_enabled', 'shipping_statuses', 'sources', 'payment_types'));
     }
 
@@ -755,7 +755,7 @@ class HutangController extends Controller
 
         $change_return = $this->dummyPaymentLine;
 
-        return view('sell.create')
+        return view('hutang_ingon2.create')
             ->with(compact(
                 'business_details',
                 'taxes',

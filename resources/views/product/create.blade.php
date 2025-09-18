@@ -114,7 +114,7 @@
 
         <div class="clearfix"></div>
 
-        <div class="col-sm-4" hidden>
+        <div class="col-sm-4">
             <div class="form-group">
                 <br>
                 <label>
