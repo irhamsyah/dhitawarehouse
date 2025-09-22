@@ -309,7 +309,7 @@ class AdminSidebarMenu
             //Hutang / Ingon2 dropdown
             if (in_array('hutang_ingon', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create') || auth()->user()->can('purchase.update'))) {
                 $menu->dropdown(
-                    __('Hutang / Ingon2'),
+                    __('Uang Dimuka'),
                     function ($sub) use ($enabled_modules, $is_admin) {
                         if ($is_admin || auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'direct_sell.view', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping'])) {
                             $sub->url(
@@ -336,10 +336,10 @@ class AdminSidebarMenu
                     ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                    <path d="M12 3v12"></path>
-                    <path d="M16 11l-4 4l-4 -4"></path>
+                    <path d="M12 15v-12"></path>
+                    <path d="M16 7l-4 -4l-4 4"></path>
                     <path d="M3 12a9 9 0 0 0 18 0"></path>
-                  </svg>', 'id' => 'tour_step6']
+                  </svg>', 'id' => 'tour_step7']
                 )->order(25);
             }
             
