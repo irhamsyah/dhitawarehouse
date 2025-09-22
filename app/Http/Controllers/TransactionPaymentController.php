@@ -392,6 +392,51 @@ class TransactionPaymentController extends Controller
             $transaction = Transaction::where('business_id', $business_id)
                                         ->with(['contact', 'location'])
                                         ->findOrFail($transaction_id);
+            
+            // 🔹 get sell due info using raw query
+            if ($transaction->type == 'purchase'){
+                $sell_due = DB::table('transactions as t')
+                ->join('contacts', 'contacts.id', '=', 't.contact_id')
+                ->select(
+                    't.id',
+                    't.invoice_no',
+                    DB::raw("IF(t.type = 'sell' AND t.status = 'final', t.final_total, 0) as total_invoice"),
+                    DB::raw("IF(
+                        t.type = 'sell' AND t.status = 'final',
+                        COALESCE(
+                            (SELECT SUM(IF(tp.is_return = 1, -1 * tp.amount, tp.amount))
+                                FROM transaction_payments tp
+                                WHERE tp.transaction_id = t.id),
+                            0
+                        ),
+                        0
+                    ) as total_paid"),
+                    DB::raw("IF(t.type = 'sell' AND t.status = 'final', t.final_total, 0) - 
+                            IF(
+                                t.type = 'sell' AND t.status = 'final',
+                                COALESCE(
+                                    (SELECT SUM(IF(tp.is_return = 1, -1 * tp.amount, tp.amount))
+                                        FROM transaction_payments tp
+                                        WHERE tp.transaction_id = t.id),
+                                    0
+                                ),
+                                0
+                            ) as sell_due"),
+                    'contacts.name',
+                    'contacts.supplier_business_name',
+                    'contacts.id as contact_id'
+                )
+                ->where('contacts.id', $transaction->contact_id)
+                ->where('t.type', 'sell')
+                ->where('t.status', 'final')
+                ->get();
+            }else{
+                $sell_due = [];
+            }
+            
+
+            // dd($sell_due);
+
             if ($transaction->payment_status != 'paid') {
                 $show_advance = in_array($transaction->type, ['sell', 'purchase']) ? true : false;
                 $payment_types = $this->transactionUtil->payment_types($transaction->location, $show_advance);
@@ -413,7 +458,7 @@ class TransactionPaymentController extends Controller
                 $accounts = $this->moduleUtil->accountsDropdown($business_id, true, false, true);
 
                 $view = view('transaction_payment.payment_row')
-                ->with(compact('transaction', 'payment_types', 'payment_line', 'amount_formated', 'accounts'))->render();
+                ->with(compact('transaction', 'payment_types', 'payment_line', 'amount_formated', 'accounts', 'sell_due'))->render();
 
                 $output = ['status' => 'due',
                     'view' => $view, ];

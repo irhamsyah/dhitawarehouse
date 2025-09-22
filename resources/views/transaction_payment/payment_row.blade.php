@@ -162,6 +162,53 @@
             </div>
           </div>
         @endif
+        
+        <!-- Uang dimuka yg belum dibayar -->
+        @if(!empty($sell_due) && count($sell_due) > 0)
+          <div class="col-md-12">
+            <h4>@lang('Transaksi belum dibayar :')</h4>
+            <table class="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  <th>
+                    <input type="checkbox" id="check_all_sell_due">
+                  </th>
+                  <th>@lang('sale.invoice_no')</th>
+                  <th>@lang('sale.total_amount')</th>
+                  <th>@lang('sale.total_paid')</th>
+                  <th>@lang('Sisa')</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach($sell_due as $row)
+                  <tr>
+                    <td>
+                      <input type="checkbox" name="sell_due_selected[]" value="{{ $row->id }}" class="sell_due_checkbox">
+                    </td>
+                    <td>{{ $row->invoice_no }}</td>
+                    <td>
+                      <span class="display_currency" data-currency_symbol="true">
+                        {{ $row->total_invoice }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="display_currency" data-currency_symbol="true">
+                        {{ $row->total_paid }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="display_currency" data-currency_symbol="true">
+                        {{ $row->sell_due }}
+                      </span>
+                    </td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+        @endif
+
+
         <div class="col-md-4">
           <div class="form-group">
             {!! Form::label('document', __('purchase.attach_document') . ':') !!}
@@ -190,3 +237,35 @@
 
   </div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->
+
+<script>
+  function updatePaymentAmount() {
+    let baseAmount = parseFloat("{{ $payment_line->amount }}"); // original amount from controller
+    let totalChecked = 0;
+
+    document.querySelectorAll('.sell_due_checkbox:checked').forEach(cb => {
+      let row = cb.closest('tr');
+      let due = parseFloat(row.querySelector('span[data-currency_symbol]').textContent.replace(/[^0-9.-]+/g,"")) || 0;
+      totalChecked += due;
+    });
+
+    let newAmount = baseAmount - totalChecked;
+    if (newAmount < 0) newAmount = 0;
+
+    let amountInput = document.querySelector('.payment_amount');
+    amountInput.value = newAmount.toFixed(2); // update input
+  }
+
+  // Select All toggle
+  document.getElementById('check_all_sell_due')?.addEventListener('change', function(e) {
+    document.querySelectorAll('.sell_due_checkbox').forEach(cb => {
+      cb.checked = e.target.checked;
+    });
+    updatePaymentAmount();
+  });
+
+  // Each checkbox update
+  document.querySelectorAll('.sell_due_checkbox').forEach(cb => {
+    cb.addEventListener('change', updatePaymentAmount);
+  });
+</script>
