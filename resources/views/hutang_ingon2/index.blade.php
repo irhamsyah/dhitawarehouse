@@ -1,11 +1,11 @@
 @extends('layouts.app')
-@section('title', __('Daftar Transaksi Hutang / Ingon2'))
+@section('title', __('Daftar Transaksi Uang Dimuka'))
 
 @section('content')
 
     <!-- Content Header (Page header) -->
     <section class="content-header no-print">
-        <h1  class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('Daftar Transaksi Hutang / Ingon2')
+        <h1  class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('Daftar Transaksi Uang Dimuka')
         </h1>
     </section>
 
