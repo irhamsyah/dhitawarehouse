@@ -3174,6 +3174,7 @@ class TransactionUtil extends Util
                 }
             }
 
+            // dd($tranaction_payments);
             //Insert new transaction payments
             if (! empty($tranaction_payments)) {
                 TransactionPayment::insert($tranaction_payments);
@@ -6215,6 +6216,8 @@ class TransactionUtil extends Util
         $parent_payment = TransactionPayment::create($inputs);
 
         $inputs['transaction_type'] = $due_payment_type;
+
+        // dd($parent_payment);
 
         event(new TransactionPaymentAdded($parent_payment, $inputs));
 

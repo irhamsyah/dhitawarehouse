@@ -1,4 +1,10 @@
-<div class="modal-dialog" role="document">
+<style>
+  .custom-modal {
+  max-width: 70% !important;
+  width: 70% !important;
+}
+</style>
+<div class="modal-dialog custom-modal" role="document">
   <div class="modal-content">
 
     {!! Form::open(['url' => action([\App\Http\Controllers\TransactionPaymentController::class, 'store']), 'method' => 'post', 'id' => 'transaction_payment_add_form', 'files' => true ]) !!}
@@ -197,7 +203,7 @@
                       </span>
                     </td>
                     <td>
-                      <span class="display_currency" data-currency_symbol="true">
+                      <span class="display_currency" data-due-currency_symbol="true">
                         {{ $row->sell_due }}
                       </span>
                     </td>
@@ -245,7 +251,7 @@
 
     document.querySelectorAll('.sell_due_checkbox:checked').forEach(cb => {
       let row = cb.closest('tr');
-      let due = parseFloat(row.querySelector('span[data-currency_symbol]').textContent.replace(/[^0-9.-]+/g,"")) || 0;
+      let due = parseFloat(row.querySelector('span[data-due-currency_symbol]').textContent.replace(/[^0-9.-]+/g,"")) || 0;
       totalChecked += due;
     });
 

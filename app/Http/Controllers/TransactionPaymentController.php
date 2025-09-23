@@ -64,7 +64,6 @@ class TransactionPaymentController extends Controller
             $business_id = $request->session()->get('user.business_id');
             $transaction_id = $request->input('transaction_id');
             $transaction = Transaction::where('business_id', $business_id)->with(['contact'])->findOrFail($transaction_id);
-
             $transaction_before = $transaction->replicate();
 
             if (! (auth()->user()->can('purchase.payments') || auth()->user()->can('hms.add_booking_payment') || auth()->user()->can('sell.payments') || auth()->user()->can('all_expense.access') || auth()->user()->can('view_own_expense'))) {
@@ -122,7 +121,7 @@ class TransactionPaymentController extends Controller
                     if (! empty($request->input('denominations'))) {
                         $this->transactionUtil->addCashDenominations($tp, $request->input('denominations'));
                     }
-
+                    // dd($inputs);
                     $inputs['transaction_type'] = $transaction->type;
                     event(new TransactionPaymentAdded($tp, $inputs));
                 }
@@ -131,10 +130,108 @@ class TransactionPaymentController extends Controller
                 $payment_status = $this->transactionUtil->updatePaymentStatus($transaction_id, $transaction->final_total);
                 $transaction->payment_status = $payment_status;
 
-                $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
+                
 
+                // insert pembayaran uang dimuka
+                $parent_payment = $tp;
+                $tranaction_payments = [];        
+                if ($request->filled('sell_due_selected')) {
+                    foreach ($request->sell_due_selected as $sell_due) {
+                        $transaction_due = Transaction::where('business_id', $business_id)->with(['contact'])->findOrFail($sell_due); 
+                        $transaction_due_before = $transaction_due->replicate();
+                        
+                        //If sell check status is final
+                        if ($transaction_due->type == 'sell' && $transaction_due->status != 'final') {
+                            continue;
+                        }
+                            
+                            $total_paid = $this->transactionUtil->getTotalPaid($transaction_due->id);
+                            $due = $transaction_due->final_total - $total_paid;
+                            
+                            $now = \Carbon::now()->toDateTimeString();
+                            
+                            $array = [
+                                'transaction_id' => $transaction_due->id,
+                                'business_id' => $parent_payment->business_id,
+                                'method' => 'other',
+                                'transaction_no' => $parent_payment->method,
+                                'card_transaction_number' => $parent_payment->card_transaction_number,
+                                'card_number' => $parent_payment->card_number,
+                                'card_type' => $parent_payment->card_type,
+                                'card_holder_name' => $parent_payment->card_holder_name,
+                                'card_month' => $parent_payment->card_month,
+                                'card_year' => $parent_payment->card_year,
+                                'card_security' => $parent_payment->card_security,
+                                'cheque_number' => $parent_payment->cheque_number,
+                                'bank_account_number' => $parent_payment->bank_account_number,
+                                'paid_on' => $parent_payment->paid_on,
+                                'created_by' => $parent_payment->created_by,
+                                'payment_for' => $parent_payment->payment_for,
+                                // 'parent_id' => $parent_payment->id,
+                                'created_at' => $now,
+                                'updated_at' => $now,
+                            ];
+                            // dd($array);    
+                            $prefix_type = 'purchase_payment';
+                            if (in_array($transaction_due->type, ['sell', 'sell_return'])) {
+                                $prefix_type = 'sell_payment';
+                            }
+                            $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type, $parent_payment->business_id);
+                            //Generate reference number
+                            $payment_ref_no = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count, $parent_payment->business_id);
+                            $array['payment_ref_no'] = $payment_ref_no;
+
+                            // if ($due <= $total_amount) {
+                                $array['amount'] = $due;
+                                $tranaction_payments[] = $array;
+                                // dd($array);
+                                //Update transaction status to paid
+                                $transaction_due->payment_status = 'paid';
+                                $transaction_due->save();
+                                
+                                if ($transaction_due->type == 'sell') {
+                                   
+                                    $moduleUtil = new ModuleUtil();
+                                    $moduleUtil->getModuleData('after_sale_saved', ['transaction' => $transaction_due, 'input' => []]);                                     
+                                }                                
+                                $this->transactionUtil->activityLog($transaction_due, 'payment_edited', $transaction_due_before);
+                                
+                    }
+                    
+                    //Insert new transaction payments
+                    if (! empty($tranaction_payments)) {
+                        TransactionPayment::insert($tranaction_payments);
+                        // dd($tranaction_payments);
+                        foreach ($tranaction_payments as $pay_for_purchase) {
+                            $prefix_type = 'purchase_payment';
+                            $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type);
+                            //Generate reference number
+                            $inputs['payment_ref_no'] = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count);
+                            // dd($pay_for_purchase);
+                            $inputs['amount'] = $pay_for_purchase['amount'];
+                            $inputs['method'] = 'other';
+                            if (! empty($inputs['amount'])) {
+                                $tp = TransactionPayment::create($inputs);
+
+                                if (! empty($request->input('denominations'))) {
+                                    $this->transactionUtil->addCashDenominations($tp, $request->input('denominations'));
+                                }
+                                // dd($inputs);
+                                $inputs['transaction_type'] = $transaction->type;
+                                event(new TransactionPaymentAdded($tp, $inputs));
+                            }
+
+                            //update payment status
+                            $payment_status = $this->transactionUtil->updatePaymentStatus($transaction_id, $inputs['amount']);
+                            $transaction->payment_status = $payment_status;
+
+                            // $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
+                        }
+                    }
+                }          
+                $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
                 DB::commit();
-            }
+            }              
 
             $output = ['success' => true,
                 'msg' => __('purchase.payment_added_success'),
@@ -429,6 +526,7 @@ class TransactionPaymentController extends Controller
                 ->where('contacts.id', $transaction->contact_id)
                 ->where('t.type', 'sell')
                 ->where('t.status', 'final')
+                ->where('t.payment_status', '!=', 'paid')
                 ->get();
             }else{
                 $sell_due = [];
@@ -587,17 +685,17 @@ class TransactionPaymentController extends Controller
         }
 
         try {
+            
             DB::beginTransaction();
 
             $business_id = request()->session()->get('business.id');
             $tp = $this->transactionUtil->payContact($request);
-
+            // dd($request);
             $pos_settings = ! empty(session()->get('business.pos_settings')) ? json_decode(session()->get('business.pos_settings'), true) : [];
             $enable_cash_denomination_for_payment_methods = ! empty($pos_settings['enable_cash_denomination_for_payment_methods']) ? $pos_settings['enable_cash_denomination_for_payment_methods'] : [];
             //add cash denomination
             if (in_array($tp->method, $enable_cash_denomination_for_payment_methods) && ! empty($request->input('denominations')) && ! empty($pos_settings['enable_cash_denomination_on']) && $pos_settings['enable_cash_denomination_on'] == 'all_screens') {
-                $denominations = [];
-
+                $denominations = [];                
                 foreach ($request->input('denominations') as $key => $value) {
                     if (! empty($value)) {
                         $denominations[] = [
@@ -607,7 +705,7 @@ class TransactionPaymentController extends Controller
                         ];
                     }
                 }
-
+                // dd($denominations);
                 if (! empty($denominations)) {
                     $tp->denominations()->createMany($denominations);
                 }
