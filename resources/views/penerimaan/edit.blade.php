@@ -105,7 +105,7 @@
               </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-3 hidden">
                 <div class="form-group">
                   <div class="multi-input">
                     {!! Form::label('pay_term_number', __('contact.pay_term') . ':') !!} @show_tooltip(__('tooltip.pay_term'))
