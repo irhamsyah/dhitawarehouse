@@ -226,9 +226,36 @@ class TransactionPaymentController extends Controller
                             $transaction->payment_status = $payment_status;
 
                             // $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
-                        }
+                        }                        
                     }
                 }          
+
+                //Bayar Premi
+                // dd($request->boolean('include_premi'));
+                if ($request->boolean('include_premi')){
+                    $prefix_type = 'purchase_payment';
+                    $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type);
+                    //Generate reference number
+                    $inputs['payment_ref_no'] = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count);
+                    // dd($pay_for_purchase);
+                    $inputs['amount'] = $request->input('premi_amount');
+                    $inputs['method'] = 'other';
+                    if (! empty($inputs['amount'])) {
+                        $tp = TransactionPayment::create($inputs);
+
+                        if (! empty($request->input('denominations'))) {
+                            $this->transactionUtil->addCashDenominations($tp, $request->input('denominations'));
+                        }
+                        // dd($inputs);
+                        $inputs['transaction_type'] = $transaction->type;
+                        event(new TransactionPaymentAdded($tp, $inputs));
+                    }
+
+                    //update payment status
+                    $payment_status = $this->transactionUtil->updatePaymentStatus($transaction_id, $inputs['amount']);
+                    $transaction->payment_status = $payment_status;
+                    // dd($transaction_id);
+                }
                 $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
                 DB::commit();
             }              

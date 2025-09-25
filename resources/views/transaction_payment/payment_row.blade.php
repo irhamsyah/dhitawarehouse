@@ -210,10 +210,35 @@
                   </tr>
                 @endforeach
               </tbody>
-            </table>
+            </table>            
           </div>
         @endif
 
+        @if(in_array($transaction->type, ['purchase', 'purchase_return']))
+          <!-- Premi input with checkbox -->
+          <div class="col-md-12">
+            <div class="col-md-4">
+              <div class="form-group">
+                <!-- Hidden field ensures always something sent -->
+                <input type="hidden" name="include_premi" value="0">
+
+                <!-- Checkbox overrides hidden value when checked -->
+                <input type="checkbox" id="include_premi" name="include_premi" value="1" class="form-check-input">
+                <label for="premi_amount">@lang('Premi')</label>
+                <input type="text" 
+                      class="form-control input_number" 
+                      id="premi_amount" 
+                      name="premi_amount" 
+                      value="{{ 20000 }}" 
+                      data-rule-min="0" 
+                      data-msg-min="@lang('validation.min.numeric', ['min' => 0])"
+                      >
+
+              </div>
+            </div>
+          </div>
+        @endif
+        <!-- <div class="clearfix"></div> -->
 
         <div class="col-md-4">
           <div class="form-group">
@@ -249,17 +274,32 @@
     let baseAmount = parseFloat("{{ $payment_line->amount }}"); // original amount from controller
     let totalChecked = 0;
 
+    // Sum selected due
     document.querySelectorAll('.sell_due_checkbox:checked').forEach(cb => {
       let row = cb.closest('tr');
-      let due = parseFloat(row.querySelector('span[data-due-currency_symbol]').textContent.replace(/[^0-9.-]+/g,"")) || 0;
+      let due = parseFloat(
+        row.querySelector('span[data-due-currency_symbol]').textContent.replace(/[^0-9.-]+/g,"")
+      ) || 0;
       totalChecked += due;
     });
 
+    // Subtract selected due from base
     let newAmount = baseAmount - totalChecked;
+
+    // Add premi if checked
+    let premiCheckbox = document.getElementById('include_premi');
+    let premiInput = document.getElementById('premi_amount');
+
+    if (premiCheckbox && premiCheckbox.checked) {
+      let premiVal = parseFloat(premiInput.value.replace(/[^0-9.-]+/g,"")) || 0;
+      newAmount -= premiVal;
+    }
+
     if (newAmount < 0) newAmount = 0;
 
+    // Update payment input
     let amountInput = document.querySelector('.payment_amount');
-    amountInput.value = newAmount.toFixed(2); // update input
+    amountInput.value = newAmount.toFixed(2);
   }
 
   // Select All toggle
@@ -274,4 +314,12 @@
   document.querySelectorAll('.sell_due_checkbox').forEach(cb => {
     cb.addEventListener('change', updatePaymentAmount);
   });
+
+  // Premi checkbox + input update
+  document.getElementById('include_premi')?.addEventListener('change', updatePaymentAmount);
+  document.getElementById('premi_amount')?.addEventListener('input', updatePaymentAmount);
+
+  // Init on page load
+  updatePaymentAmount();
 </script>
+
