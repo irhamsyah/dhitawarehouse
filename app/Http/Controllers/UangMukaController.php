@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Artisan;
 use Spatie\Activitylog\Models\Activity;
 use Yajra\DataTables\Facades\DataTables;
 
-class HutangController extends Controller
+class UangMukaController extends Controller
 {
     /**
      * All Utils instance.
@@ -631,7 +631,7 @@ class HutangController extends Controller
         $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
 
 
-        return view('hutang_ingon2.index')
+        return view('uang_muka.index')
         ->with(compact('business_locations', 'customers', 'is_woocommerce', 'sales_representative', 'is_cmsn_agent_enabled', 'commission_agents', 'service_staffs', 'is_tables_enabled', 'is_service_staff_enabled', 'is_types_service_enabled', 'shipping_statuses', 'sources', 'payment_types'));
     }
 
@@ -755,7 +755,7 @@ class HutangController extends Controller
 
         $change_return = $this->dummyPaymentLine;
 
-        return view('hutang_ingon2.create')
+        return view('uang_muka.create')
             ->with(compact(
                 'business_details',
                 'taxes',

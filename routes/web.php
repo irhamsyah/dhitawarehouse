@@ -23,7 +23,7 @@ use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GroupTaxController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\HutangController;
+use App\Http\Controllers\UangMukaController;
 use App\Http\Controllers\ImportOpeningStockController;
 use App\Http\Controllers\ImportProductsController;
 use App\Http\Controllers\ImportSalesController;
@@ -227,7 +227,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/sells/draft-dt', [SellController::class, 'getDraftDatables']);
     Route::resource('sells', SellController::class)->except(['show']);
 
-    Route::resource('hutang-ingon2', HutangController::class)->except(['show']);
+    Route::resource('uang-muka', UangMukaController::class)->except(['show']);
 
     Route::resource('sales-admin', SalesAdminController::class)->except(['show']);
     Route::get('/sales-admin/target-penjualan', [SalesAdminController::class, 'target_penjualan']);

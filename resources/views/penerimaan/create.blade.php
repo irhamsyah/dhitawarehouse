@@ -558,7 +558,7 @@
 			<div class="row hidden">
 				@include('sale_pos.partials.payment_row_form', ['row_index' => 1, 'show_date' => true, 'show_denomination' => true])
 			</div>
-			<!-- @include('sale_pos.partials.payment_row_form', ['row_index' => 0, 'show_date' => true, 'show_denomination' => true]) -->
+			@include('sale_pos.partials.payment_row_form', ['row_index' => 0, 'show_date' => true, 'show_denomination' => true])
 			<hr>
 			<div class="row hidden">
 				<div class="col-sm-12">

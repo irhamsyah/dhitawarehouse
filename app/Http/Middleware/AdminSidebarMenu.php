@@ -306,23 +306,23 @@ class AdminSidebarMenu
                         ->with(['contactAccess'])
                         ->findOrFail(auth()->user()->id);
 
-            //Hutang / Ingon2 dropdown
-            if (in_array('hutang_ingon', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create') || auth()->user()->can('purchase.update'))) {
+            //Uang Muka dropdown
+            if (in_array('uang_muka', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create') || auth()->user()->can('purchase.update'))) {
                 $menu->dropdown(
                     __('Uang Muka'),
                     function ($sub) use ($enabled_modules, $is_admin) {
                         if ($is_admin || auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'direct_sell.view', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping'])) {
                             $sub->url(
-                                action([\App\Http\Controllers\HutangController::class, 'index']),
+                                action([\App\Http\Controllers\UangMukaController::class, 'index']),
                                 __('Daftar Transaksi'),
-                                ['icon' => '', 'active' => request()->segment(1) == 'hutang-ingon2' && request()->segment(2) == null]
+                                ['icon' => '', 'active' => request()->segment(1) == 'uang-muka' && request()->segment(2) == null]
                             );
                         }
                         if (in_array('add_sale', $enabled_modules) && auth()->user()->can('direct_sell.access')) {
                             $sub->url(
-                                action([\App\Http\Controllers\HutangController::class, 'create']),
+                                action([\App\Http\Controllers\UangMukaController::class, 'create']),
                                 __('Tambah Transaksi'),
-                                ['icon' => '', 'active' => request()->segment(1) == 'hutang-ingon2' && request()->segment(2) == 'create' && empty(request()->get('status'))]
+                                ['icon' => '', 'active' => request()->segment(1) == 'uang-muka' && request()->segment(2) == 'create' && empty(request()->get('status'))]
                             );
                         }
                         // if (auth()->user()->can('purchase.update')) {
