@@ -179,29 +179,35 @@
                   <th>
                     <input type="checkbox" id="check_all_sell_due">
                   </th>
-                  <th>@lang('sale.invoice_no')</th>
-                  <th>@lang('sale.total_amount')</th>
-                  <th>@lang('sale.total_paid')</th>
+                  <th>@lang('No. Voucher')</th>
+                  <th>@lang('Deskripsi')</th>
+                  <th>@lang('sale.total_amount')</th>                  
                   <th>@lang('Sisa')</th>
                 </tr>
               </thead>
               <tbody>
-                @foreach($sell_due as $row)
+                @php
+                  $sum_all = $sell_due->sum('total_invoice');
+                  $sum_first5 = $sell_due->take(5)->sum('total_invoice');
+                  $sum_difference = $sum_all - $sum_first5;
+                @endphp
+
+                @foreach($sell_due->take(5) as $row)
                   <tr>
                     <td>
                       <input type="checkbox" name="sell_due_selected[]" value="{{ $row->id }}" class="sell_due_checkbox">
                     </td>
                     <td>{{ $row->invoice_no }}</td>
+                     <td>
+                      <span >
+                        {{ $row->products }}
+                      </span>
+                    </td>
                     <td>
                       <span class="display_currency" data-currency_symbol="true">
                         {{ $row->total_invoice }}
                       </span>
-                    </td>
-                    <td>
-                      <span class="display_currency" data-currency_symbol="true">
-                        {{ $row->total_paid }}
-                      </span>
-                    </td>
+                    </td>                   
                     <td>
                       <span class="display_currency" data-due-currency_symbol="true">
                         {{ $row->sell_due }}
@@ -209,36 +215,126 @@
                     </td>
                   </tr>
                 @endforeach
+
+                {{-- Show totals --}}
+                <!-- <tr>
+                  <td colspan="2"><strong>Total (all invoices):</strong></td>
+                  <td colspan="3">
+                    <span class="display_currency" data-currency_symbol="true">
+                      {{ $sum_all }}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2"><strong>Total (first 5 invoices):</strong></td>
+                  <td colspan="3">
+                    <span class="display_currency" data-currency_symbol="true">
+                      {{ $sum_first5 }}
+                    </span>
+                  </td>
+                </tr> -->
+                <tr>
+                  <td colspan="2"><strong></strong></td>
+                  <td colspan="2">
+                    <div class="form-group mb-0">
+                      <!-- Hidden field ensures always something sent -->
+                      <input type="hidden" name="include_remaining" value="0">
+
+                      <!-- Checkbox to enable/disable editing -->
+                      <input type="checkbox" id="include_remaining" name="include_remaining" value="1" class="form-check-input">
+                      <label for="remaining_amount">Remaining (All – First 5):</label>
+
+                      <!-- Editable input -->
+                      <input type="text" 
+                            class="form-control input_number" 
+                            id="remaining_amount" 
+                            name="remaining_amount" 
+                            value="{{ $sum_difference }}" 
+                            data-rule-min="0" 
+                            data-msg-min="@lang('validation.min.numeric', ['min' => 0])"
+                            >
+                    </div>
+                  </td>
+                </tr>
               </tbody>
             </table>            
           </div>
         @endif
 
         @if(in_array($transaction->type, ['purchase', 'purchase_return']))
+          <table class="table table-bordered hidden">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Product Name</th>
+              <th>Quantity</th>
+              <th>Premi Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @php
+              $sum_qty = $transaction_detail->sum('quantity');
+            @endphp
+            @foreach($transaction_detail as $row)
+              <tr>
+                <td>{{ $row->sku }}</td>
+                <td>{{ $row->name }}</td>
+                <td>{{ $row->quantity }}</td>
+                <td>
+                  <span class="display_currency" data-currency_symbol="true">
+                    {{ $row->quantity * 20000 }}
+                  </span>
+                </td>
+              </tr>
+            @endforeach
+          </tbody>          
+        </table>
           <!-- Premi input with checkbox -->
           <div class="col-md-12">
-            <div class="col-md-4">
+            <!-- <div class="col-md-4"> -->
               <div class="form-group">
-                <!-- Hidden field ensures always something sent -->
-                <input type="hidden" name="include_premi" value="0">
+                <table class="table table-bordered">
+          
+                <tbody>            
+                    <tr>
+                      <td colspan="1">
+                          <!-- Hidden field ensures always something sent -->
+                          <input type="hidden" name="include_premi" value="0">
 
-                <!-- Checkbox overrides hidden value when checked -->
-                <input type="checkbox" id="include_premi" name="include_premi" value="1" class="form-check-input">
-                <label for="premi_amount">@lang('Premi')</label>
-                <input type="text" 
-                      class="form-control input_number" 
-                      id="premi_amount" 
-                      name="premi_amount" 
-                      value="{{ 20000 }}" 
-                      data-rule-min="0" 
-                      data-msg-min="@lang('validation.min.numeric', ['min' => 0])"
-                      >
+                          <!-- Checkbox overrides hidden value when checked -->
+                          <input type="checkbox" id="include_premi" name="include_premi" value="1" class="form-check-input">
 
+                          <label for="premi_amount" class="ms-2 me-3">@lang('Premi')</label>                                                
+                      </td>
+                      <td colspan="4">
+                        <span class="me-3">Total Quantity: {{ $sum_qty }} Kg</span>
+                      </td>
+                      <td colspan="4">
+                        <input type="text" 
+                              class="form-control input_number d-inline-block" 
+                              style="width:150px" 
+                              id="premi" 
+                              name="premi" 
+                              value="{{ 20000 }}" 
+                              data-rule-min="0" 
+                              data-msg-min="@lang('validation.min.numeric', ['min' => 0])"
+                          >
+                      </td>
+                      <td colspan="4">
+                        <!-- hidden input for total premi -->
+                        <input type="hidden" id="premi_amount" name="premi_amount" value="{{ 20000 * $sum_qty }}">
+                        <span class="me-3" id="total_premi">
+                          Total Premi: {{ 20000 * $sum_qty }}
+                        </span>
+                      </td>
+                  </tr>
+
+                </tbody>      
+                </table>
               </div>
-            </div>
+            <!-- </div> -->
           </div>
         @endif
-        <!-- <div class="clearfix"></div> -->
 
         <div class="col-md-4">
           <div class="form-group">
@@ -288,11 +384,18 @@
 
     // Add premi if checked
     let premiCheckbox = document.getElementById('include_premi');
-    let premiInput = document.getElementById('premi_amount');
-
+    let premiAmount = document.getElementById('premi_amount');
     if (premiCheckbox && premiCheckbox.checked) {
-      let premiVal = parseFloat(premiInput.value.replace(/[^0-9.-]+/g,"")) || 0;
+      let premiVal = parseFloat(premiAmount.value.replace(/[^0-9.-]+/g,"")) || 0;
       newAmount -= premiVal;
+    }
+
+    // Add remaining (sum_difference) if checked
+    let remainingCheckbox = document.getElementById('include_remaining');
+    let remainingInput = document.getElementById('remaining_amount');
+    if (remainingCheckbox && remainingCheckbox.checked) {
+      let remainingVal = parseFloat(remainingInput.value.replace(/[^0-9.-]+/g,"")) || 0;
+      newAmount -= remainingVal;
     }
 
     if (newAmount < 0) newAmount = 0;
@@ -319,7 +422,28 @@
   document.getElementById('include_premi')?.addEventListener('change', updatePaymentAmount);
   document.getElementById('premi_amount')?.addEventListener('input', updatePaymentAmount);
 
+  // Remaining checkbox + input update
+  document.getElementById('include_remaining')?.addEventListener('change', updatePaymentAmount);
+  document.getElementById('remaining_amount')?.addEventListener('input', updatePaymentAmount);
+
   // Init on page load
   updatePaymentAmount();
+
+  const premiInput = document.getElementById('premi');
+  const totalPremiEl = document.getElementById('total_premi');
+  const sumQty = {{ $sum_qty }};
+
+  function updatePremi() {
+    let premiVal = parseFloat(premiInput.value.replace(/[^0-9.-]+/g,"")) || 0;
+    let total = premiVal * sumQty;
+    // Update hidden input
+    document.getElementById('premi_amount').value = total;
+    updatePaymentAmount();
+    totalPremiEl.textContent = "Total Premi: " + total.toLocaleString();
+  }
+
+  premiInput.addEventListener('input', updatePremi);
+  updatePremi();
 </script>
+
 
