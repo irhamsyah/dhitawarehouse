@@ -309,7 +309,7 @@ class AdminSidebarMenu
             //Hutang / Ingon2 dropdown
             if (in_array('hutang_ingon', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create') || auth()->user()->can('purchase.update'))) {
                 $menu->dropdown(
-                    __('Uang Dimuka'),
+                    __('Uang Muka'),
                     function ($sub) use ($enabled_modules, $is_admin) {
                         if ($is_admin || auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'direct_sell.view', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping'])) {
                             $sub->url(

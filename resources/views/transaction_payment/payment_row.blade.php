@@ -169,7 +169,7 @@
           </div>
         @endif
         
-        <!-- Uang dimuka yg belum dibayar -->
+        <!-- Uang Muka yg belum dibayar -->
         @if(!empty($sell_due) && count($sell_due) > 0)
           <div class="col-md-12">
             <h4>@lang('Transaksi belum dibayar :')</h4>

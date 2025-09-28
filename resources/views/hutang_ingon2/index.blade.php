@@ -1,11 +1,11 @@
 @extends('layouts.app')
-@section('title', __('Daftar Transaksi Uang Dimuka'))
+@section('title', __('Daftar Transaksi Uang Muka'))
 
 @section('content')
 
     <!-- Content Header (Page header) -->
     <section class="content-header no-print">
-        <h1  class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('Daftar Transaksi Uang Dimuka')
+        <h1  class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('Daftar Transaksi Uang Muka')
         </h1>
     </section>
 
@@ -68,7 +68,7 @@
                         <tr>
                             <th>@lang('messages.action')</th>
                             <th>@lang('messages.date')</th>
-                            <th>@lang('sale.invoice_no')</th>
+                            <th>@lang('No. Voucher')</th>
                             <th>@lang('sale.customer_name')</th>
                             <th>@lang('lang_v1.contact_no')</th>
                             <th>@lang('sale.location')</th>

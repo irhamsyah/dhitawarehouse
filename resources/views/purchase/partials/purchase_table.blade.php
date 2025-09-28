@@ -3,7 +3,7 @@
         <tr>
             <th>@lang('messages.action')</th>
             <th>@lang('messages.date')</th>
-            <th>@lang('purchase.ref_no')</th>
+            <th>@lang('No. Nota')</th>
             <th>@lang('purchase.location')</th>
             <th>@lang('purchase.supplier')</th>
             <th>@lang('purchase.purchase_status')</th>
