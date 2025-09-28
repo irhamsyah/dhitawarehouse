@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\AccountTransaction;
 use App\Contact;
 use App\Events\TransactionPaymentAdded;
 use App\Events\TransactionPaymentUpdated;
@@ -65,6 +66,7 @@ class TransactionPaymentController extends Controller
             $transaction_id = $request->input('transaction_id');
             $transaction = Transaction::where('business_id', $business_id)->with(['contact'])->findOrFail($transaction_id);
             $transaction_before = $transaction->replicate();
+            $contact_id = $transaction->contact_id;
 
             if (! (auth()->user()->can('purchase.payments') || auth()->user()->can('hms.add_booking_payment') || auth()->user()->can('sell.payments') || auth()->user()->can('all_expense.access') || auth()->user()->can('view_own_expense'))) {
                 abort(403, 'Unauthorized action.');
@@ -256,7 +258,130 @@ class TransactionPaymentController extends Controller
                     $transaction->payment_status = $payment_status;
                     // dd($transaction_id);
                 }
-                $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
+                // $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
+
+                //Bayar Sisa Uang Muka belum dibayar
+                // dd($request->boolean('include_remaining'));
+                if ($request->boolean('include_remaining')){
+                    $prefix_type = 'purchase_payment';
+                    $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type);
+                    //Generate reference number
+                    $inputs['payment_ref_no'] = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count);
+                    // dd($pay_for_purchase);
+                    $inputs['amount'] = $request->input('remaining_amount');
+                    $inputs['method'] = 'other';
+                    if (! empty($inputs['amount'])) {
+                        $tp = TransactionPayment::create($inputs);
+
+                        if (! empty($request->input('denominations'))) {
+                            $this->transactionUtil->addCashDenominations($tp, $request->input('denominations'));
+                        }
+                        // dd($inputs);
+                        $inputs['transaction_type'] = $transaction->type;
+                        event(new TransactionPaymentAdded($tp, $inputs));
+                    }
+
+                    //update payment status
+                    $payment_status = $this->transactionUtil->updatePaymentStatus($transaction_id, $inputs['amount']);
+                    $transaction->payment_status = $payment_status;
+                    // dd($transaction_id);
+                }
+                if ($request->boolean('include_remaining')){
+                    
+                    $business_id = auth()->user()->business_id;
+                    $inputs = $request->only(['amount','remaining_amount', 'method', 'note', 'card_number', 'card_holder_name',
+                        'card_transaction_number', 'card_type', 'card_month', 'card_year', 'card_security',
+                        'cheque_number', 'bank_account_number', ]);
+                    //  dd($inputs);
+                    //payment type option is available on pay contact modal
+                    // $is_reverse = $request->has('is_reverse') && $request->input('is_reverse') == 1 ? true : false;
+
+                    // $payment_types = $this->transactionUtil->payment_types();
+
+                    // if (! array_key_exists($inputs['method'], $payment_types)) {
+                    //     throw new \Exception('Payment method not found');
+                    // }
+                    $inputs['paid_on'] = $request->input('paid_on', \Carbon::now()->toDateTimeString());
+                    // if ($format_data) {
+                    //     $inputs['paid_on'] = $this->uf_date($inputs['paid_on'], true);
+                        $inputs['amount'] = $inputs['remaining_amount'] ;
+                    // }
+                    // dd($contact_id);
+                    $inputs['created_by'] = auth()->user()->id;
+                    $inputs['payment_for'] = $contact_id;
+                    $inputs['business_id'] = $business_id;
+                    $inputs['method'] = 'other';
+                    
+                    // if (! $is_reverse) {
+                        $inputs['is_advance'] = 1;
+                    // }
+
+                    // for ($i = 1; $i < 8; $i++) {
+                    //     if ($inputs['method'] == 'custom_pay_'.$i) {
+                    //         $inputs['transaction_no'] = $request->input("transaction_no_{$i}");
+                    //     }
+                    // }
+
+                    $contact = Contact::where('business_id', $business_id)
+                                    ->findOrFail($contact_id);
+                    // dd($inputs);
+                    $due_payment_type = 'sell'; //$request->input('due_payment_type');
+                    // if (empty($due_payment_type)) {
+                    //     $due_payment_type = $contact->type == 'supplier' ? 'purchase' : 'sell';
+                    // }
+
+                    // $prefix_type = '';
+                    // if ($contact->type == 'customer') {
+                        $prefix_type = 'sell_payment';
+                    // } elseif ($contact->type == 'supplier') {
+                    //     $prefix_type = 'purchase_payment';
+                    // }
+                    // dd($inputs);
+                    $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type, $business_id);
+                    
+                    //Generate reference number
+                    $payment_ref_no = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count, $business_id);
+
+                    $inputs['payment_ref_no'] = $payment_ref_no;
+
+                    if (! empty($request->input('account_id'))) {
+                        $inputs['account_id'] = $request->input('account_id');
+                    }
+                    
+                    //get payment type (creditor debit)
+                    $payment_type = AccountTransaction::getAccountTransactionType($due_payment_type);
+
+                    //if reverse payment
+                    // if ($due_payment_type == 'sell' && $is_reverse) {
+                        $payment_type = 'debit';
+                    // }
+                    // if ($due_payment_type == 'purchase' && $is_reverse) {
+                    //     $payment_type = 'credit';
+                    // }
+
+                    $inputs['payment_type'] = $payment_type;
+
+                    //Upload documents if added
+                    // $inputs['document'] = $this->uploadFile($request, 'document', 'documents');
+
+                    $parent_payment = TransactionPayment::create($inputs);
+
+                    $inputs['transaction_type'] = $due_payment_type;
+
+                    
+
+                    event(new TransactionPaymentAdded($parent_payment, $inputs));
+
+                    //Distribute above payment among unpaid transactions
+                    // if (! $is_reverse) {
+                        $excess_amount = $this->transactionUtil->payAtOnce($parent_payment, $due_payment_type);
+                    // }
+                    //Update excess amount
+                    if (! empty($excess_amount)) {
+                        $this->transactionUtil->updateContactBalance($contact, $excess_amount);
+                    }
+                }
+                // $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
                 DB::commit();
             }              
 
@@ -266,7 +391,7 @@ class TransactionPaymentController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             $msg = __('messages.something_went_wrong');
-
+            dd($e);
             if (get_class($e) == \App\Exceptions\AdvanceBalanceNotAvailable::class) {
                 $msg = $e->getMessage();
             } else {
@@ -516,11 +641,25 @@ class TransactionPaymentController extends Controller
             $transaction = Transaction::where('business_id', $business_id)
                                         ->with(['contact', 'location'])
                                         ->findOrFail($transaction_id);
+            $transaction_detail = DB::table('transactions')
+            ->join('purchase_lines', 'transactions.id', '=', 'purchase_lines.transaction_id')
+            ->join('products', 'products.id', '=', 'purchase_lines.product_id')
+            ->select(
+                'transactions.id',
+                'products.sku',
+                'products.name',
+                'purchase_lines.quantity'
+            )
+            ->where('transactions.id', $transaction_id)
+            ->get();
+                                        
             
             // 🔹 get sell due info using raw query
             if ($transaction->type == 'purchase'){
                 $sell_due = DB::table('transactions as t')
                 ->join('contacts', 'contacts.id', '=', 't.contact_id')
+                ->leftJoin('transaction_sell_lines as tsl', 'tsl.transaction_id', '=', 't.id')
+                ->leftJoin('products as p', 'tsl.product_id', '=', 'p.id')
                 ->select(
                     't.id',
                     't.invoice_no',
@@ -529,8 +668,8 @@ class TransactionPaymentController extends Controller
                         t.type = 'sell' AND t.status = 'final',
                         COALESCE(
                             (SELECT SUM(IF(tp.is_return = 1, -1 * tp.amount, tp.amount))
-                                FROM transaction_payments tp
-                                WHERE tp.transaction_id = t.id),
+                            FROM transaction_payments tp
+                            WHERE tp.transaction_id = t.id),
                             0
                         ),
                         0
@@ -548,19 +687,29 @@ class TransactionPaymentController extends Controller
                             ) as sell_due"),
                     'contacts.name',
                     'contacts.supplier_business_name',
-                    'contacts.id as contact_id'
+                    'contacts.id as contact_id',
+                    DB::raw("GROUP_CONCAT(CONCAT(p.name, ' ') SEPARATOR ', ') as products")
                 )
                 ->where('contacts.id', $transaction->contact_id)
                 ->where('t.type', 'sell')
                 ->where('t.status', 'final')
                 ->where('t.payment_status', '!=', 'paid')
+                // ->where('t.final_total', '>=', 1000000)
+                ->groupBy(
+                    't.id',
+                    't.invoice_no',
+                    't.final_total',
+                    'contacts.id',
+                    'contacts.name',
+                    'contacts.supplier_business_name'
+                )
+                ->orderBy('t.id', 'desc')   // 👈 added order by
+                // ->limit(5)                
                 ->get();
             }else{
                 $sell_due = [];
-            }
-            
-
-            // dd($sell_due);
+            }        
+            //  dd($sell_due);
 
             if ($transaction->payment_status != 'paid') {
                 $show_advance = in_array($transaction->type, ['sell', 'purchase']) ? true : false;
@@ -583,7 +732,7 @@ class TransactionPaymentController extends Controller
                 $accounts = $this->moduleUtil->accountsDropdown($business_id, true, false, true);
 
                 $view = view('transaction_payment.payment_row')
-                ->with(compact('transaction', 'payment_types', 'payment_line', 'amount_formated', 'accounts', 'sell_due'))->render();
+                ->with(compact('transaction', 'transaction_detail', 'payment_types', 'payment_line', 'amount_formated', 'accounts', 'sell_due'))->render();
 
                 $output = ['status' => 'due',
                     'view' => $view, ];
@@ -717,7 +866,7 @@ class TransactionPaymentController extends Controller
 
             $business_id = request()->session()->get('business.id');
             $tp = $this->transactionUtil->payContact($request);
-            // dd($request);
+            //  dd($request);
             $pos_settings = ! empty(session()->get('business.pos_settings')) ? json_decode(session()->get('business.pos_settings'), true) : [];
             $enable_cash_denomination_for_payment_methods = ! empty($pos_settings['enable_cash_denomination_for_payment_methods']) ? $pos_settings['enable_cash_denomination_for_payment_methods'] : [];
             //add cash denomination
