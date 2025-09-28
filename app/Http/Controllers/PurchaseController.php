@@ -1086,6 +1086,71 @@ class PurchaseController extends Controller
     }
 
     /**
+     * Retrieves products list.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getPenerimaanEntryRow(Request $request)
+    {
+        if (request()->ajax()) {
+            $product_id = $request->input('product_id');
+            $variation_id = $request->input('variation_id');
+            $business_id = request()->session()->get('user.business_id');
+            $location_id = $request->input('location_id');
+            $is_purchase_order = $request->has('is_purchase_order');
+            $supplier_id = $request->input('supplier_id');
+
+            $hide_tax = 'hide';
+            if ($request->session()->get('business.enable_inline_tax') == 1) {
+                $hide_tax = '';
+            }
+
+            $currency_details = $this->transactionUtil->purchaseCurrencyDetails($business_id);
+
+            if (! empty($product_id)) {
+                $row_count = $request->input('row_count');
+                $product = Product::where('id', $product_id)
+                                    ->with(['unit', 'second_unit'])
+                                    ->first();
+
+                $sub_units = $this->productUtil->getSubUnits($business_id, $product->unit->id, false, $product_id);
+
+                $query = Variation::where('product_id', $product_id)
+                                ->with([
+                                    'product_variation',
+                                    'variation_location_details' => function ($q) use ($location_id) {
+                                        $q->where('location_id', $location_id);
+                                    },
+                                ]);
+                if ($variation_id !== '0') {
+                    $query->where('id', $variation_id);
+                }
+
+                $variations = $query->get();
+                $taxes = TaxRate::where('business_id', $business_id)
+                            ->ExcludeForTaxGroup()
+                            ->get();
+
+                $last_purchase_line = $this->getLastPurchaseLine($variation_id, $location_id, $supplier_id);
+
+                return view('purchase.partials.purchase_entry_row')
+                    ->with(compact(
+                        'product',
+                        'variations',
+                        'row_count',
+                        'variation_id',
+                        'taxes',
+                        'currency_details',
+                        'hide_tax',
+                        'sub_units',
+                        'is_purchase_order',
+                        'last_purchase_line'
+                    ));
+            }
+        }
+    }
+
+    /**
      * Finds last purchase line of a variation for the supplier for a location
      */
     private function getLastPurchaseLine($variation_id, $location_id, $supplier_id = null)
