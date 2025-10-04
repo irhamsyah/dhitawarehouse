@@ -908,16 +908,36 @@ class SalesAdminController extends Controller
                     WHERE TP.transaction_id = transactions.id
                 ) LIKE ?", ["%{$keyword}%"]);
             })
+            ->editColumn('sales_target', function($row) {
+                $value = (int) ($row->sales_target + $row->remaining_target); // force integer
+                return '<span class="sales-target" data-orig-value="' . $value . '">' . $value . '</span>';
+            })
+            ->editColumn('total_qty', function($row) {
+                $value = (int) $row->total_qty; // force integer
+                return '<span class="total-qty" data-orig-value="' . $value . '">' . $value . '</span>';
+            })
+            ->addColumn('pencapaian_target', function ($row) {
+                if (($row->sales_target + $row->remaining_target) > 0) {
+                    $pencapaian = ($row->total_qty / ($row->sales_target + $row->remaining_target)) * 100;
+                } else {
+                    $pencapaian = 100;
+                }
+
+                // format 2 digit
+                $formatted = number_format($pencapaian, 2);
+
+                return '<span class="pencapaian" data-orig-value="' . $formatted . '">' . $formatted . '%</span>';
+            })
             ->editColumn('remaining_target', function ($row) {
-                $remaining = ($row->sales_target+$row->remaining_target) - $row->total_paid;
+                $remaining = ($row->sales_target+$row->remaining_target) - $row->total_qty;
                 if($remaining<0)$remaining=0;
-                $remaining_target = '<span class="remaining" data-orig-value="'.$remaining.'">'.$this->transactionUtil->num_f($remaining, true).'</span>';
+                $remaining_target = '<span class="remaining" data-orig-value="'.$remaining.'">'.$remaining.'</span>';
                 return $remaining_target;
             });
 
             // dd($datatable);
 
-            $rawColumns = ['action', 'remaining_target', 'added_by', 'total_paid','first_name','last_name'];
+            $rawColumns = ['action', 'sales_target', 'remaining_target', 'pencapaian_target', 'added_by', 'total_paid','total_qty','first_name','last_name'];
 
             // dd($datatable->make(true));
 

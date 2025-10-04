@@ -24,8 +24,10 @@
                         <tr>                      
                             <th class="tw-w-64">@lang('Tindakan')</th>      
                             <th class="tw-w-64">@lang('sales_admin.name')</th>
+                            <th class="tw-w-64">@lang('Target Penjualan')</th>
                             <th class="tw-w-64">@lang('sales_admin.total_sales')</th>
                             <th class="tw-w-64">@lang('sales_admin.remaining_target')</th>  
+                            <th class="tw-w-64">@lang('Pencapaian')</th>  
                             <th class="tw-w-64">nama</th>                           
                         </tr>
                     </thead>
@@ -120,14 +122,24 @@
                         "searchable": false
                     },
                     {
-                        data: 'total_paid',
-                        name: 'total_paid',
+                        data: 'sales_target',
+                        name: 'sales_target',
+                        "searchable": false
+                    },
+                    {
+                        data: 'total_qty',
+                        name: 'total_qty',
                         "searchable": false
                     },
                     {
                         data: 'remaining_target',
                         name: 'remaining_target',
                         "searchable": false
+                    },
+                    {
+                        data: 'pencapaian_target',
+                        name: 'pencapaian_target',
+                        searchable: false
                     },
                     {
                         data: 'first_name',

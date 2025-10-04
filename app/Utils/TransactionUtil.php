@@ -5236,6 +5236,26 @@ class TransactionUtil extends Util
                                     ELSE 0
                                 END
                             ) AS total_paid
+                        "),
+                        DB::raw("
+                            SUM(
+                                CASE
+                                WHEN transactions.status = 'final'
+                                    AND transactions.business_id = 1
+                                    AND transactions.type = 'sell'
+                                    AND MONTH(transactions.transaction_date) = $currentMonth
+                                    AND YEAR(transactions.transaction_date) = $currentYear
+                                THEN (
+                                    SELECT 
+                                        SUM(
+                                            TSL.quantity - TSL.quantity_returned
+                                        ) 
+                                    FROM transaction_sell_lines AS TSL
+                                    WHERE TSL.transaction_id = transactions.id
+                                )
+                                ELSE 0
+                            END
+                            ) AS total_qty
                         ")
                     )
                     ->groupBy('u.id', 'u.first_name', 'u.last_name', 'u.sales_target', 'u.remaining_target', 'u.surname');
