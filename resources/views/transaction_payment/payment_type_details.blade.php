@@ -57,13 +57,13 @@
 	<div class="col-md-12">
 		<div class="form-group">
 			{!! Form::label("bank_account_number",__('lang_v1.bank_account_number')) !!}
-			{!! Form::text( "bank_account_number", $payment_line->bank_account_number, ['class' => 'form-control', 'placeholder' => __('lang_v1.bank_account_number')]); !!}
+			{!! Form::text( "bank_account_number", $payment_line->bank_account_number ?: $contact->custom_field1, ['class' => 'form-control', 'placeholder' => __('lang_v1.bank_account_number')]); !!}
 		</div>
 	</div>
 </div>
 <div class="payment_details_div @if( $payment_line->method !== 'custom_pay_1' ) {{ 'hide' }} @endif" data-type="custom_pay_1" >
 	<div class="col-md-12">
-		<div class="form-group">
+		<div class="form-group">			
 			{!! Form::label("transaction_no_1", __('lang_v1.transaction_no')) !!}
 			{!! Form::text("transaction_no_1", $payment_line->transaction_no, ['class' => 'form-control', 'placeholder' => __('lang_v1.transaction_no')]); !!}
 		</div>

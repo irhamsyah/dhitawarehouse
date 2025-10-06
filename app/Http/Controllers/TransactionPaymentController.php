@@ -11,6 +11,7 @@ use App\Transaction;
 use App\TransactionPayment;
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
+use App\Utils\ContactUtil;
 use Datatables;
 use DB;
 use Illuminate\Http\Request;
@@ -21,16 +22,19 @@ class TransactionPaymentController extends Controller
 
     protected $moduleUtil;
 
+    protected $contactUtil;
+
     /**
      * Constructor
      *
      * @param  TransactionUtil  $transactionUtil
      * @return void
      */
-    public function __construct(TransactionUtil $transactionUtil, ModuleUtil $moduleUtil)
+    public function __construct(TransactionUtil $transactionUtil, ModuleUtil $moduleUtil, ContactUtil $contactUtil)
     {
         $this->transactionUtil = $transactionUtil;
         $this->moduleUtil = $moduleUtil;
+        $this->contactUtil = $contactUtil;
     }
 
     /**
@@ -260,6 +264,32 @@ class TransactionPaymentController extends Controller
                 }
                 // $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
 
+                //Bayar Titipan
+                if ($request->boolean('include_titipan')){
+                    $prefix_type = 'purchase_payment';
+                    $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type);
+                    //Generate reference number
+                    $inputs['payment_ref_no'] = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count);
+                    // dd($pay_for_purchase);
+                    $inputs['amount'] = $request->input('titipan_amount');
+                    $inputs['method'] = 'other';
+                    if (! empty($inputs['amount'])) {
+                        $tp = TransactionPayment::create($inputs);
+
+                        if (! empty($request->input('denominations'))) {
+                            $this->transactionUtil->addCashDenominations($tp, $request->input('denominations'));
+                        }
+                        // dd($inputs);
+                        $inputs['transaction_type'] = $transaction->type;
+                        event(new TransactionPaymentAdded($tp, $inputs));
+                    }
+
+                    //update payment status
+                    $payment_status = $this->transactionUtil->updatePaymentStatus($transaction_id, $inputs['amount']);
+                    $transaction->payment_status = $payment_status;
+                    // dd($transaction_id);
+                }
+
                 //Bayar Sisa Uang Muka belum dibayar
                 // dd($request->boolean('include_remaining'));
                 if ($request->boolean('include_remaining')){
@@ -286,6 +316,7 @@ class TransactionPaymentController extends Controller
                     $transaction->payment_status = $payment_status;
                     // dd($transaction_id);
                 }
+
                 if ($request->boolean('include_remaining')){
                     
                     $business_id = auth()->user()->business_id;
@@ -301,7 +332,7 @@ class TransactionPaymentController extends Controller
                     // if (! array_key_exists($inputs['method'], $payment_types)) {
                     //     throw new \Exception('Payment method not found');
                     // }
-                    $inputs['paid_on'] = $request->input('paid_on', \Carbon::now()->toDateTimeString());
+                    $inputs['paid_on'] = \Carbon::now()->toDateTimeString();
                     // if ($format_data) {
                     //     $inputs['paid_on'] = $this->uf_date($inputs['paid_on'], true);
                         $inputs['amount'] = $inputs['remaining_amount'] ;
@@ -368,13 +399,14 @@ class TransactionPaymentController extends Controller
 
                     $inputs['transaction_type'] = $due_payment_type;
 
-                    
+                    // dd($inputs);
 
                     event(new TransactionPaymentAdded($parent_payment, $inputs));
 
                     //Distribute above payment among unpaid transactions
                     // if (! $is_reverse) {
                         $excess_amount = $this->transactionUtil->payAtOnce($parent_payment, $due_payment_type);
+                        // dd($excess_amount);
                     // }
                     //Update excess amount
                     if (! empty($excess_amount)) {
@@ -731,8 +763,10 @@ class TransactionPaymentController extends Controller
                 //Accounts
                 $accounts = $this->moduleUtil->accountsDropdown($business_id, true, false, true);
 
+                $contact = $this->contactUtil->getContactInfo($business_id,$transaction->contact_id);
+                // dd($contact);
                 $view = view('transaction_payment.payment_row')
-                ->with(compact('transaction', 'transaction_detail', 'payment_types', 'payment_line', 'amount_formated', 'accounts', 'sell_due'))->render();
+                ->with(compact('transaction', 'contact', 'transaction_detail', 'payment_types', 'payment_line', 'amount_formated', 'accounts', 'sell_due'))->render();
 
                 $output = ['status' => 'due',
                     'view' => $view, ];

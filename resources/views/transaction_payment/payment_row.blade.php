@@ -217,32 +217,23 @@
                 @endforeach
 
                 {{-- Show totals --}}
-                <!-- <tr>
-                  <td colspan="2"><strong>Total (all invoices):</strong></td>
-                  <td colspan="3">
-                    <span class="display_currency" data-currency_symbol="true">
-                      {{ $sum_all }}
-                    </span>
-                  </td>
-                </tr>
                 <tr>
-                  <td colspan="2"><strong>Total (first 5 invoices):</strong></td>
-                  <td colspan="3">
-                    <span class="display_currency" data-currency_symbol="true">
-                      {{ $sum_first5 }}
-                    </span>
+                  <td>
+                    <input type="hidden" name="include_remaining" value="0">
+                    <!-- Checkbox to enable/disable editing -->
+                    <input type="checkbox" id="include_remaining" name="include_remaining" value="1" class="form-check-input">
                   </td>
-                </tr> -->
-                <tr>
-                  <td colspan="2"><strong></strong></td>
-                  <td colspan="2">
+                  <td>
+                  </td>
+                  <td>
+                    <!-- Hidden field ensures always something sent -->                      
+                    <label for="remaining_amount">Sisa uang muka belum dibayar:</label>
+                  </td>
+                  <td>
+                  </td>
+                  <td>
                     <div class="form-group mb-0">
-                      <!-- Hidden field ensures always something sent -->
-                      <input type="hidden" name="include_remaining" value="0">
-
-                      <!-- Checkbox to enable/disable editing -->
-                      <input type="checkbox" id="include_remaining" name="include_remaining" value="1" class="form-check-input">
-                      <label for="remaining_amount">Remaining (All – First 5):</label>
+                      
 
                       <!-- Editable input -->
                       <input type="text" 
@@ -254,6 +245,18 @@
                             data-msg-min="@lang('validation.min.numeric', ['min' => 0])"
                             >
                     </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2"></td>
+                  <td>
+                    <!-- Hidden field ensures always something sent -->                      
+                    <label for="remaining_amount">Total uang muka belum dibayar:</label>
+                  </td>
+                  <td>
+                  </td>
+                  <td>
+                    <span class="display_currency" data-currency_symbol="true">{{ $sum_all }}</span>
                   </td>
                 </tr>
               </tbody>
@@ -297,20 +300,21 @@
           
                 <tbody>            
                     <tr>
-                      <td colspan="1">
+                      <td >
                           <!-- Hidden field ensures always something sent -->
                           <input type="hidden" name="include_premi" value="0">
 
                           <!-- Checkbox overrides hidden value when checked -->
-                          <input type="checkbox" id="include_premi" name="include_premi" value="1" class="form-check-input">
-
-                          <label for="premi_amount" class="ms-2 me-3">@lang('Premi')</label>                                                
+                          <input type="checkbox" id="include_premi" name="include_premi" value="1" class="form-check-input">                                                                        
                       </td>
-                      <td colspan="4">
+                      <td>
+                         <label for="premi_amount" class="ms-2 me-3">@lang('Premi')</label> 
+                      </td>
+                      <td colspan="2">
                         <span class="me-3">Total Quantity: {{ $sum_qty }} Kg</span>
                       </td>
-                      <td colspan="4">
-                        <input type="text" 
+                      <td >
+                        <input type="hidden" 
                               class="form-control input_number d-inline-block" 
                               style="width:150px" 
                               id="premi" 
@@ -319,13 +323,47 @@
                               data-rule-min="0" 
                               data-msg-min="@lang('validation.min.numeric', ['min' => 0])"
                           >
+                          <span class="display_currency" data-currency_symbol="false">{{ 20000 }}</span>
                       </td>
-                      <td colspan="4">
+                      <td >
                         <!-- hidden input for total premi -->
                         <input type="hidden" id="premi_amount" name="premi_amount" value="{{ 20000 * $sum_qty }}">
-                        <span class="me-3" id="total_premi">
-                          Total Premi: {{ 20000 * $sum_qty }}
+                        <span class="me-3" >
+                          Total Premi: 
                         </span>
+                        <span class="display_currency" id="total_premi">{{ 20000 * $sum_qty }}</span>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          <!-- Hidden field ensures always something sent -->
+                          <input type="hidden" name="include_titipan" value="0">
+
+                          <!-- Checkbox overrides hidden value when checked -->
+                          <input type="checkbox" id="include_titipan" name="include_titipan" value="1" class="form-check-input">
+                      </td>
+                      <td>
+                          <label for="titipan_amount" class="ms-2 me-3">@lang('Titipan')</label>                                                
+                      </td>
+                      <td colspan="2"></td>
+                      <td>
+                        <input type="text" 
+                              class="form-control input_number d-inline-block display_currency" 
+                              style="width:150px" 
+                              id="titipan" 
+                              name="titipan" 
+                              value="{{ 20000 }}" 
+                              data-rule-min="0" 
+                              data-msg-min="@lang('validation.min.numeric', ['min' => 0])"
+                          >
+                      </td>
+                      <td>
+                        <!-- hidden input for total premi -->
+                        <input type="hidden" id="titipan_amount" name="titipan_amount" value="{{ 20000 * $sum_qty }}">
+                        <span class="me-3" >
+                          Total Titipan: 
+                        </span>
+                        <span class="display_currency" id="total_titipan">{{ 20000 * $sum_qty }}</span>
                       </td>
                   </tr>
 
@@ -334,6 +372,16 @@
               </div>
             <!-- </div> -->
           </div>
+
+          <!-- Titipan Premi input with checkbox -->
+          <div class="col-md-12">
+              <table class="table table-bordered">          
+                <tbody>            
+                    
+
+                </tbody>      
+                </table>
+            </div>  
         @endif
 
         <div class="col-md-4">
@@ -365,7 +413,8 @@
   </div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->
 
-<script>
+<script>  
+(function() {
   function updatePaymentAmount() {
     let baseAmount = parseFloat("{{ $payment_line->amount }}"); // original amount from controller
     let totalChecked = 0;
@@ -388,6 +437,14 @@
     if (premiCheckbox && premiCheckbox.checked) {
       let premiVal = parseFloat(premiAmount.value.replace(/[^0-9.-]+/g,"")) || 0;
       newAmount -= premiVal;
+    }
+
+    // Add titipan if checked
+    let titipanCheckbox = document.getElementById('include_titipan');
+    let titipanAmount = document.getElementById('titipan_amount');
+    if (titipanCheckbox && titipanCheckbox.checked) {
+      let titipanVal = parseFloat(titipanAmount.value.replace(/[^0-9.-]+/g,"")) || 0;
+      newAmount -= titipanVal;
     }
 
     // Add remaining (sum_difference) if checked
@@ -422,6 +479,10 @@
   document.getElementById('include_premi')?.addEventListener('change', updatePaymentAmount);
   document.getElementById('premi_amount')?.addEventListener('input', updatePaymentAmount);
 
+  // Titipan checkbox + input update
+  document.getElementById('include_titipan')?.addEventListener('change', updatePaymentAmount);
+  document.getElementById('titipan_amount')?.addEventListener('input', updatePaymentAmount);
+
   // Remaining checkbox + input update
   document.getElementById('include_remaining')?.addEventListener('change', updatePaymentAmount);
   document.getElementById('remaining_amount')?.addEventListener('input', updatePaymentAmount);
@@ -429,9 +490,11 @@
   // Init on page load
   updatePaymentAmount();
 
-  const premiInput = document.getElementById('premi');
-  const totalPremiEl = document.getElementById('total_premi');
-  const sumQty = {{ $sum_qty }};
+  let premiInput = document.getElementById('premi');
+  let totalPremiEl = document.getElementById('total_premi');
+  let titipanInput = document.getElementById('titipan');
+  let totalTitipanEl = document.getElementById('total_titipan');
+  let sumQty = {{ $sum_qty }};
 
   function updatePremi() {
     let premiVal = parseFloat(premiInput.value.replace(/[^0-9.-]+/g,"")) || 0;
@@ -439,11 +502,24 @@
     // Update hidden input
     document.getElementById('premi_amount').value = total;
     updatePaymentAmount();
-    totalPremiEl.textContent = "Total Premi: " + total.toLocaleString();
+    totalPremiEl.textContent = total.toLocaleString();
+  }
+
+  function updateTitipan() {
+    let titipanVal = parseFloat(titipanInput.value.replace(/[^0-9.-]+/g,"")) || 0;
+    let total = titipanVal * sumQty;
+    // Update hidden input
+    document.getElementById('titipan_amount').value = total;
+    updatePaymentAmount();
+    totalTitipanEl.textContent = total.toLocaleString();
   }
 
   premiInput.addEventListener('input', updatePremi);
+  titipanInput.addEventListener('input', updateTitipan);
   updatePremi();
+  updateTitipan();
+})();
+  
 </script>
 
 
