@@ -314,7 +314,7 @@ class AdminSidebarMenu
                         if ($is_admin || auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'direct_sell.view', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping'])) {
                             $sub->url(
                                 action([\App\Http\Controllers\UangMukaController::class, 'index']),
-                                __('Daftar Transaksi'),
+                                __('Daftar Premi'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'uang-muka' && request()->segment(2) == null]
                             );
                         }

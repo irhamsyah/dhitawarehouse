@@ -266,32 +266,32 @@
 
         @if(in_array($transaction->type, ['purchase', 'purchase_return']))
           <table class="table table-bordered hidden">
-          <thead>
-            <tr>
-              <th>SKU</th>
-              <th>Product Name</th>
-              <th>Quantity</th>
-              <th>Premi Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            @php
-              $sum_qty = $transaction_detail->sum('quantity');
-            @endphp
-            @foreach($transaction_detail as $row)
+            <thead>
               <tr>
-                <td>{{ $row->sku }}</td>
-                <td>{{ $row->name }}</td>
-                <td>{{ $row->quantity }}</td>
-                <td>
-                  <span class="display_currency" data-currency_symbol="true">
-                    {{ $row->quantity * 20000 }}
-                  </span>
-                </td>
+                <th>SKU</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Premi Total</th>
               </tr>
-            @endforeach
-          </tbody>          
-        </table>
+            </thead>
+            <tbody>
+              @php
+                $sum_qty = $transaction_detail->sum('quantity');
+              @endphp
+              @foreach($transaction_detail as $row)
+                <tr>
+                  <td>{{ $row->sku }}</td>
+                  <td>{{ $row->name }}</td>
+                  <td>{{ $row->quantity }}</td>
+                  <td>
+                    <span class="display_currency" data-currency_symbol="true">
+                      {{ $row->quantity * 20000 }}
+                    </span>
+                  </td>
+                </tr>
+              @endforeach
+            </tbody>          
+          </table>
           <!-- Premi input with checkbox -->
           <div class="col-md-12">
             <!-- <div class="col-md-4"> -->
@@ -371,17 +371,7 @@
                 </table>
               </div>
             <!-- </div> -->
-          </div>
-
-          <!-- Titipan Premi input with checkbox -->
-          <div class="col-md-12">
-              <table class="table table-bordered">          
-                <tbody>            
-                    
-
-                </tbody>      
-                </table>
-            </div>  
+          </div> 
         @endif
 
         <div class="col-md-4">
@@ -494,7 +484,7 @@
   let totalPremiEl = document.getElementById('total_premi');
   let titipanInput = document.getElementById('titipan');
   let totalTitipanEl = document.getElementById('total_titipan');
-  let sumQty = {{ $sum_qty }};
+  let sumQty = {{ $sum_qty ?? 0 }};
 
   function updatePremi() {
     let premiVal = parseFloat(premiInput.value.replace(/[^0-9.-]+/g,"")) || 0;
