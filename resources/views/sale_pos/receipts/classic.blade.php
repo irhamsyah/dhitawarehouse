@@ -16,15 +16,15 @@
 
 			<!-- business information here -->
 			<div class="col-xs-12 text-center">
-				<h2 class="text-center">
+				<h3 class="text-center">
 					<!-- Shop & Location Name  -->
 					@if(!empty($receipt_details->display_name))
 						{{$receipt_details->display_name}}
 					@endif
-				</h2>
+				</h3>
 
 				<!-- Address -->
-				<p>
+				<span>
 				@if(!empty($receipt_details->address))
 						<small class="text-center">
 						{!! $receipt_details->address !!}
@@ -42,7 +42,7 @@
 				@if(!empty($receipt_details->location_custom_fields))
 					<br>{{ $receipt_details->location_custom_fields }}
 				@endif
-				</p>
+				</span>
 				<p>
 				@if(!empty($receipt_details->sub_heading_line1))
 					{{ $receipt_details->sub_heading_line1 }}
@@ -74,9 +74,9 @@
 
 			<!-- Title of receipt -->
 			@if(!empty($receipt_details->invoice_heading))
-				<h3 class="text-center">
+				<h4 class="text-center">
 					{!! $receipt_details->invoice_heading !!}
-				</h3>
+				</h4>
 			@endif
 		</div>
 		@if(!empty($receipt_details->letter_head))
@@ -123,7 +123,7 @@
 				<!-- customer info -->
 				@if(!empty($receipt_details->customer_info))
 					<br/>
-					<b>{{ $receipt_details->customer_label }}</b> <br> {!! $receipt_details->customer_info !!} <br>
+					<b>{{ $receipt_details->customer_label }}</b>  {!! $receipt_details->customer_info !!} <br>
 				@endif
 				@if(!empty($receipt_details->client_id_label))
 					<br/>
@@ -271,7 +271,7 @@
 	@includeIf('sale_pos.receipts.partial.common_repair_invoice')
 </div>
 
-<div class="row" style="color: #000000 !important;">
+<!-- <div class="row" style="color: #000000 !important;"> -->
 	<div class="col-xs-12">
 		<br/>
 		@php
@@ -396,9 +396,9 @@
 			</tbody>
 		</table>
 	</div>
-</div>
+<!-- </div> -->
 
-<div class="row" style="color: #000000 !important;">
+<!-- <div class="row" style="color: #000000 !important;"> -->
 	<div class="col-md-12"><hr/></div>
 	<div class="col-xs-6">
 
@@ -447,7 +447,7 @@
 					{{$receipt_details->all_due}}
 				</td>
 			</tr>
-			@endif
+			@endif			
 		</table>
 	</div>
 
@@ -603,11 +603,36 @@
 								<small>({{$receipt_details->total_in_words}})</small>
 							@endif
 						</td>
-					</tr>
+					</tr>					
 				</tbody>
         	</table>
-        </div>
+        </div>		
     </div>
+	<div class="bcol-md-12">
+		<table>
+			<tr>
+				<td>Catatan :</td>
+			</tr>
+			<tr><td>1. Harga sudah termasuk PPn.</td></tr>
+			<tr><td>2. Barang yang sudah dibeli tidak dapat ditukar/dikembalikan.</td></tr>	
+			<tr style="height: 10px;"></tr>
+		</table>  
+	</div>
+	<div class="border-bottom col-md-12">			  	        
+		 <table class="table table-slim w-100">
+			<tr>
+				<td class="text-center">Hormat kami</td>
+				<td class="text-center">Pengirim</td>
+				<td class="text-center">Penerima</td>
+			</tr>
+			<tr style="height: 40px;"></tr>
+			<tr>
+				<td class="text-center">Admin</td>
+				<td class="text-center">----------</td>
+				<td class="text-center">----------</td>
+			</tr>
+		</table>
+	</div>
 
     <div class="border-bottom col-md-12">
 	    @if(empty($receipt_details->hide_price) && !empty($receipt_details->tax_summary_label) )
@@ -634,7 +659,7 @@
 	    </div>
     @endif
     
-</div>
+<!-- </div> -->
 <div class="row" style="color: #000000 !important;">
 	@if(!empty($receipt_details->footer_text))
 	<div class="@if($receipt_details->show_barcode || $receipt_details->show_qr_code) col-xs-8 @else col-xs-12 @endif">
