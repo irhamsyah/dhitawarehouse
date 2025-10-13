@@ -711,13 +711,14 @@ class AdminSidebarMenu
                                     ['icon' => '', 'active' => request()->segment(2) == 'lot-report']
                                 );
                             }
-
-                            if (in_array('stock_adjustment', $enabled_modules)) {
-                                $sub->url(
-                                    action([\App\Http\Controllers\ReportController::class, 'getStockAdjustmentReport']),
-                                    __('report.stock_adjustment_report'),
-                                    ['icon' => '', 'active' => request()->segment(2) == 'stock-adjustment-report']
-                                );
+                            if (auth()->user()->can('view_product_stock_value')) {
+                                if (in_array('stock_adjustment', $enabled_modules)) {
+                                    $sub->url(
+                                        action([\App\Http\Controllers\ReportController::class, 'getStockAdjustmentReport']),
+                                        __('report.stock_adjustment_report'),
+                                        ['icon' => '', 'active' => request()->segment(2) == 'stock-adjustment-report']
+                                    );
+                                }
                             }
                         }
 
