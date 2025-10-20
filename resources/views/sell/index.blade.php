@@ -93,6 +93,7 @@
                             <th>@lang('sale.shipping_details')</th>
                             <th>@lang('restaurant.table')</th>
                             <th>@lang('restaurant.service_staff')</th>
+                            <th>@lang('Retur Jual')</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -104,9 +105,10 @@
                             <td class="footer_sale_total"></td>
                             <td class="footer_total_paid" ></td>                            
                             <td class="footer_total_cash"></td>
+                            <td class="footer_total_sell_return"></td>
+                            <td class="footer_total_cash_remaining"></td>
                             <td class="footer_total_transfer"></td>
-                            <td class="footer_total_remaining"></td>
-                            <!-- <td class="footer_total_sell_return_due"></td> -->
+                            <td class="footer_total_remaining"></td>                            
                             <!-- <td colspan="2"></td> -->
                             <td class="service_type_count"></td>
                             <!-- <td colspan="7"></td> -->
@@ -329,6 +331,11 @@
                             visible: false
                         @endif
                     },
+                    {
+                        data: 'return_amount',
+                        orderable: false,
+                        visible: false
+                    },
                 ],
                 "fnDrawCallback": function(oSettings) {
                     __currency_convert_recursively($('#sell_table'));
@@ -338,6 +345,7 @@
                     var footer_total_paid = 0;
                     var footer_total_remaining = 0;
                     var footer_total_sell_return_due = 0;
+                    var footer_total_sell_return = 0;
                     var footer_total_transfer = 0;
                     var footer_total_cash = 0;
                     for (var r in data) {
@@ -365,14 +373,21 @@
                         footer_total_sell_return_due += $(data[r].return_due).find('.sell_return_due')
                             .data('orig-value') ? parseFloat($(data[r].return_due).find(
                                 '.sell_return_due').data('orig-value')) : 0;
+                        
+                        footer_total_sell_return += $(data[r].return_amount).find('.sell_return')
+                            .data('orig-value') ? parseFloat($(data[r].return_amount).find(
+                                '.sell_return').data('orig-value')) : 0;
                     }
 
                     $('.footer_total_sell_return_due').html(__currency_trans_from_en(
                         footer_total_sell_return_due));
+                    $('.footer_total_sell_return').html('Total Retur Penjualan :<br>' +__currency_trans_from_en(
+                        footer_total_sell_return));
                     $('.footer_total_remaining').html('Total Belum Dibayar :<br>' +__currency_trans_from_en(footer_total_remaining));
                     $('.footer_total_paid').html('Total Dibayar :<br>' +__currency_trans_from_en(footer_total_paid));
                     $('.footer_sale_total').html('Total Penjualan :<br>' +__currency_trans_from_en(footer_sale_total));
                     $('.footer_total_cash').html('Total Bayar Cash :<br>' + __currency_trans_from_en(footer_total_cash));
+                    $('.footer_total_cash_remaining').html('Total Sisa Cash :<br>' + __currency_trans_from_en(footer_total_cash-footer_total_sell_return));
                     $('.footer_total_transfer').html('Total Bayar Transfer :<br>' +__currency_trans_from_en(footer_total_transfer));
 
                     $('.footer_payment_status_count').html(__count_status(data, 'payment_status'));
