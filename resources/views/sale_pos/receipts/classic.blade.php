@@ -15,7 +15,7 @@
 			@endif
 
 			<!-- business information here -->
-			<div class="col-xs-12 text-center">
+			<div class="col-xs-12 text-center hidden">
 				<h3 class="text-center">
 					<!-- Shop & Location Name  -->
 					@if(!empty($receipt_details->display_name))
@@ -124,7 +124,8 @@
 				@if(!empty($receipt_details->customer_info))
 					<br/>
 					<b>{{ $receipt_details->customer_label }}</b>  {!! $receipt_details->customer_info !!} <br>
-				@endif
+				@endif				
+
 				@if(!empty($receipt_details->client_id_label))
 					<br/>
 					<b>{{ $receipt_details->client_id_label }}</b> {{ $receipt_details->client_id }}
@@ -152,6 +153,18 @@
 
 			<span class="pull-right text-left">
 				<b>{{$receipt_details->date_label}}</b> {{$receipt_details->invoice_date}}
+				<br>
+				@if(!empty($receipt_details->display_name))
+					{{$receipt_details->display_name}}
+				@endif
+				<br>
+				@if(!empty($receipt_details->address))
+						<small class="text-center">
+						{!! $receipt_details->address !!}
+						</small>
+				@endif
+				<br>
+				<small class="text-center">BCA (1429911999) CV DHITA FRESH FRUIT</small>				
 
 				@if(!empty($receipt_details->due_date_label))
 				<br><b>{{$receipt_details->due_date_label}}</b> {{$receipt_details->due_date ?? ''}}
@@ -287,9 +300,16 @@
 				$p_width -= 10;
 			@endphp
 		@endif
-		<table class="table table-responsive table-slim">
+		<style>
+		.table-bordered td,
+		.table-bordered th {
+			padding: 8px 12px !important; /* vertical | horizontal padding */
+		}
+		</style>
+		<table class="table table-responsive table-slim table-bordered">
 			<thead>
 				<tr>
+					<th width="10%">No</th>
 					<th width="{{$p_width}}%">{{$receipt_details->table_product_label}}</th>
 					<th class="text-right" width="15%">{{$receipt_details->table_qty_label}}</th>
 					<th class="text-right" width="15%">{{$receipt_details->table_unit_price_label}}</th>
@@ -303,8 +323,10 @@
 				</tr>
 			</thead>
 			<tbody>
+				@php $total_qty = 0; $total_item = 0; @endphp
 				@forelse($receipt_details->lines as $line)
 					<tr>
+						<td>{{$total_item += 1}}</td>
 						<td>
 							@if(!empty($line['image']))
 								<img src="{{$line['image']}}" alt="Image" width="50" style="float: left; margin-right: 8px;">
@@ -338,7 +360,7 @@
                         </td>
 						<td class="text-right">
 							{{$line['quantity']}} {{$line['units']}} 
-
+							@php $total_qty += $line['quantity']; @endphp
 							@if($receipt_details->show_base_unit_details && $line['quantity'] && $line['base_unit_multiplier'] !== 1)
                             <br><small>
                             	{{$line['quantity']}} x {{$line['base_unit_multiplier']}} = {{$line['orig_quantity']}} {{$line['base_unit_name']}}
@@ -400,7 +422,7 @@
 
 <!-- <div class="row" style="color: #000000 !important;"> -->
 	<div class="col-md-12"><hr/></div>
-	<div class="col-xs-6">
+	<div class="col-xs-12">
 
 		<table class="table table-slim">
 
@@ -427,16 +449,24 @@
 			@endif
 
 			<!-- Total Due-->
-			@if(!empty($receipt_details->total_due) && !empty($receipt_details->total_due_label))
+			<!-- @if(!empty($receipt_details->total_due) && !empty($receipt_details->total_due_label)) -->
 			<tr>
-				<th>
-					{!! $receipt_details->total_due_label !!}
+				<th style="width:60%">
+					<!-- {!! $receipt_details->total_due_label !!} -->
+					Total :
 				</th>
-				<td class="text-right">
-					{{$receipt_details->total_due}}
+				<td colspan="2" class="text-right">
+					{{ $total_qty }}
+				</td>
+				<td colspan="2" class="text-right">
+					{{$receipt_details->total}}
+					@if(!empty($receipt_details->total_in_words))
+						<br>
+						<small>({{$receipt_details->total_in_words}})</small>
+					@endif
 				</td>
 			</tr>
-			@endif
+			<!-- @endif -->
 
 			@if(!empty($receipt_details->all_due))
 			<tr>
@@ -451,7 +481,7 @@
 		</table>
 	</div>
 
-	<div class="col-xs-6">
+	<div class="col-xs-6 hidden">
         <div class="table-responsive">
           	<table class="table table-slim">
 				<tbody>
@@ -608,7 +638,7 @@
         	</table>
         </div>		
     </div>
-	<div class="bcol-md-12">
+	<div class="border-bottom col-md-12">
 		<table>
 			<tr>
 				<td>Catatan :</td>
