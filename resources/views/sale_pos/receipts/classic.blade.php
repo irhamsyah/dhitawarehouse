@@ -85,13 +85,21 @@
 			</div>
 		@endif
 	<div class="col-xs-12 text-center">
+		@if(!empty($receipt_details->invoice_heading))
+			<!-- <h5 class="text-center"> -->
+				<!-- {!! $receipt_details->invoice_heading !!} -->
+				 <b>FAKTUR PENJUALAN</b>
+			<!-- </h5> -->
+			 <br>
+			No Invoice {{$receipt_details->invoice_no}} - {{$receipt_details->invoice_date}}
+		@endif
 		<!-- Invoice  number, Date  -->
 		<p style="width: 100% !important" class="word-wrap">
 			<span class="pull-left text-left word-wrap">
-				@if(!empty($receipt_details->invoice_no_prefix))
+				<!-- @if(!empty($receipt_details->invoice_no_prefix))
 					<b>{!! $receipt_details->invoice_no_prefix !!}</b>
 				@endif
-				{{$receipt_details->invoice_no}}
+				{{$receipt_details->invoice_no}} -->
 
 				@if(!empty($receipt_details->types_of_service))
 					<br/>
@@ -152,19 +160,20 @@
 			</span>
 
 			<span class="pull-right text-left">
-				<b>{{$receipt_details->date_label}}</b> {{$receipt_details->invoice_date}}
-				<br>
+				<!-- <b>{{$receipt_details->date_label}}</b> {{$receipt_details->invoice_date}} -->
+				<!-- <br> -->
 				@if(!empty($receipt_details->display_name))
-					{{$receipt_details->display_name}}
+					<!-- {{$receipt_details->display_name}} -->
 				@endif
 				<br>
 				@if(!empty($receipt_details->address))
-						<small class="text-center">
+						<!-- <small class="text-center">
 						{!! $receipt_details->address !!}
-						</small>
+						</small> -->
 				@endif
+				<small class="text-center">A/N : CV DHITA FRESH FRUIT</small>	
 				<br>
-				<small class="text-center">BCA (1429911999) CV DHITA FRESH FRUIT</small>				
+				<small class="text-center">BCA : 1429911999</small>				
 
 				@if(!empty($receipt_details->due_date_label))
 				<br><b>{{$receipt_details->due_date_label}}</b> {{$receipt_details->due_date ?? ''}}
@@ -303,13 +312,17 @@
 		<style>
 		.table-bordered td,
 		.table-bordered th {
-			padding: 8px 12px !important; /* vertical | horizontal padding */
+			padding: 2px 12px !important; /* vertical | horizontal padding */
+			border: 1px solid #000 !important; /* Darker, solid border */
+		}
+		.table-bordered {
+			border: 1px solid #000 !important;
 		}
 		</style>
 		<table class="table table-responsive table-slim table-bordered">
 			<thead>
 				<tr>
-					<th width="10%">No</th>
+					<th width="5%">No</th>
 					<th width="{{$p_width}}%">{{$receipt_details->table_product_label}}</th>
 					<th class="text-right" width="15%">{{$receipt_details->table_qty_label}}</th>
 					<th class="text-right" width="15%">{{$receipt_details->table_unit_price_label}}</th>
@@ -332,7 +345,7 @@
 								<img src="{{$line['image']}}" alt="Image" width="50" style="float: left; margin-right: 8px;">
 							@endif
                             {{$line['name']}} {{$line['product_variation']}} {{$line['variation']}} 
-                            @if(!empty($line['sub_sku'])), {{$line['sub_sku']}} @endif @if(!empty($line['brand'])), {{$line['brand']}} @endif @if(!empty($line['cat_code'])), {{$line['cat_code']}}@endif
+                            <!-- @if(!empty($line['sub_sku'])), {{$line['sub_sku']}} @endif @if(!empty($line['brand'])), {{$line['brand']}} @endif @if(!empty($line['cat_code'])), {{$line['cat_code']}}@endif -->
                             @if(!empty($line['product_custom_fields'])), {{$line['product_custom_fields']}} @endif
                             @if(!empty($line['product_description']))
                             	<small>
