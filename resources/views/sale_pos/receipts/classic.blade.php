@@ -426,7 +426,7 @@
 
 		<table class="table table-slim">
 
-			@if(!empty($receipt_details->payments))
+			<!-- @if(!empty($receipt_details->payments))
 				@foreach($receipt_details->payments as $payment)
 					<tr>
 						<td>{{$payment['method']}}</td>
@@ -434,10 +434,10 @@
 						<td class="text-right">{{$payment['date']}}</td>
 					</tr>
 				@endforeach
-			@endif
+			@endif -->
 
 			<!-- Total Paid-->
-			@if(!empty($receipt_details->total_paid))
+			<!-- @if(!empty($receipt_details->total_paid))
 				<tr>
 					<th>
 						{!! $receipt_details->total_paid_label !!}
@@ -446,13 +446,11 @@
 						{{$receipt_details->total_paid}}
 					</td>
 				</tr>
-			@endif
+			@endif -->
 
-			<!-- Total Due-->
-			<!-- @if(!empty($receipt_details->total_due) && !empty($receipt_details->total_due_label)) -->
+			
 			<tr>
-				<th style="width:60%">
-					<!-- {!! $receipt_details->total_due_label !!} -->
+				<th style="width:60%">					
 					Total :
 				</th>
 				<td colspan="2" class="text-right">
@@ -466,7 +464,7 @@
 					@endif
 				</td>
 			</tr>
-			<!-- @endif -->
+			
 
 			@if(!empty($receipt_details->all_due))
 			<tr>
