@@ -2433,7 +2433,7 @@ class ReportController extends Controller
      */
     public function sellPaymentReport(Request $request)
     {
-        if (! auth()->user()->can('purchase_n_sell_report.view')) {
+        if (! auth()->user()->can('sell_payment_report.view')) {
             abort(403, 'Unauthorized action.');
         }
 

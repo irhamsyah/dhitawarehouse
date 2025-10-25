@@ -754,13 +754,18 @@ class AdminSidebarMenu
                                 __('lang_v1.purchase_payment_report'),
                                 ['icon' => '', 'active' => request()->segment(2) == 'purchase-payment-report']
                             );
+                            
+                        }
 
+                        if (auth()->user()->can('sell_payment_report.view')) {
+                        // laporan pembayaran penjualan
                             $sub->url(
                                 action([\App\Http\Controllers\ReportController::class, 'sellPaymentReport']),
                                 __('lang_v1.sell_payment_report'),
                                 ['icon' => '', 'active' => request()->segment(2) == 'sell-payment-report']
                             );
                         }
+
                         if (in_array('expenses', $enabled_modules) && auth()->user()->can('expense_report.view')) {
                             $sub->url(
                                 action([\App\Http\Controllers\ReportController::class, 'getExpenseReport']),

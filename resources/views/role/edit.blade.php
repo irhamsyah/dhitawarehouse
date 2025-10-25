@@ -1413,6 +1413,14 @@
           <div class="col-md-12">
             <div class="checkbox">
               <label>
+                {!! Form::checkbox('permissions[]', 'sell_payment_report.view', in_array('sell_payment_report.view', $role_permissions),
+                [ 'class' => 'input-icheck']); !!} {{ __( 'Lihat Laporan Pembayaran Penjualan' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
                 {!! Form::checkbox('permissions[]', 'tax_report.view', in_array('tax_report.view', $role_permissions), 
                 [ 'class' => 'input-icheck']); !!} {{ __( 'role.tax_report.view' ) }}
               </label>
