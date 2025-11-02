@@ -1359,6 +1359,133 @@ $(document).ready(function() {
         }
     );
 
+    // Laporan Kas
+    if ($('#spr_date_filter').length == 1) {
+        $('#spr_date_filter').daterangepicker(nowDateRangeSettings, function(start, end) {
+            
+            $('#spr_date_filter span').val(
+                start.format(moment_date_format) + ' ~ ' + end.format(moment_date_format)
+            );
+            
+            kas_report.ajax.reload();
+        });
+        $('#spr_date_filter').on('cancel.daterangepicker', function(ev, picker) {
+            $('#spr_date_filter').val('');
+            kas_report.ajax.reload();
+        });
+    }
+
+    kas_report = $('table#kas_report_table').DataTable({
+        paging: false,
+        processing: true,
+        serverSide: true,
+        fixedHeader:false,
+        aaSorting: [[2, 'desc']],
+        ajax: {
+            url: '/reports/kas-report',
+            data: function(d) {
+                d.supplier_id = $('select#customer_id').val();
+                d.location_id = $('select#location_id').val();
+                d.payment_types = $('select#payment_types').val();
+                d.customer_group_id = $('select#customer_group_filter').val();
+                var start = '';
+                var end = '';
+                if ($('input#spr_date_filter').val()) {
+                    start = $('input#spr_date_filter')
+                        .data('daterangepicker')
+                        .startDate.format('YYYY-MM-DD');
+                    end = $('input#spr_date_filter')
+                        .data('daterangepicker')
+                        .endDate.format('YYYY-MM-DD');
+                }
+                // alert($('input#spr_date_filter').val());
+                d.start_date = start;
+                d.end_date = end;
+            },
+        },
+        columns: [
+            {
+                orderable: false,
+                searchable: false,
+                data: null,
+                defaultContent: '',
+            },
+            { data: 'payment_ref_no', name: 'payment_ref_no' },
+            { data: 'paid_on', name: 'paid_on' },
+            { data: 'amount', name: 'transaction_payments.amount' },
+            { data: 'customer', name: 'customer_subquery.customer_name', orderable: false, searchable: true},
+            { data: 'type', name:'type', orderable: true, searchable: true },
+            // { data: 'customer_group', name: 'customer_group', searchable: false},
+            { data: 'method', name: 'method' },
+            { data: 'invoice_no', name: 't.invoice_no' },
+            { data: 'action', orderable: false, searchable: false },
+        ],
+        fnDrawCallback: function(oSettings) {
+            var total_amount = sum_table_col($('#kas_report_table'), 'paid-amount');
+            $('#footer_total_amount').text(total_amount);
+            __currency_convert_recursively($('#kas_report_table'));
+        },
+        createdRow: function(row, data, dataIndex) {
+            if (!data.transaction_id) {
+                $(row)
+                    .find('td:eq(0)')
+                    .addClass('details-control');
+            }
+        },
+    });
+    // Array to track the ids of the details displayed rows
+    var spr_detail_rows = [];
+
+    $('#kas_report_table tbody').on('click', 'tr td.details-control', function() {
+        var tr = $(this).closest('tr');
+        var row = kas_report.row(tr);
+        var idx = $.inArray(tr.attr('id'), spr_detail_rows);
+
+        if (row.child.isShown()) {
+            tr.removeClass('details');
+            row.child.hide();
+
+            // Remove from the 'open' array
+            spr_detail_rows.splice(idx, 1);
+        } else {
+            tr.addClass('details');
+
+            row.child(show_child_payments(row.data())).show();
+
+            // Add to the 'open' array
+            if (idx === -1) {
+                spr_detail_rows.push(tr.attr('id'));
+            }
+        }
+    });
+    // On each draw, loop over the `detailRows` array and show any child rows
+    kas_report.on('draw', function() {
+        $.each(spr_detail_rows, function(i, id) {
+            $('#' + id + ' td.details-control').trigger('click');
+        });
+    });
+
+    if ($('#spr_date_filter').length == 1) {
+        $('#spr_date_filter').daterangepicker(nowDateRangeSettings, function(start, end) {
+            
+            $('#spr_date_filter span').val(
+                start.format(moment_date_format) + ' ~ ' + end.format(moment_date_format)
+            );
+            
+            kas_report.ajax.reload();
+        });
+        $('#spr_date_filter').on('cancel.daterangepicker', function(ev, picker) {
+            $('#spr_date_filter').val('');
+            kas_report.ajax.reload();
+        });
+    }
+
+    $('#kas_report_form #location_id, #kas_report_form #customer_id, #kas_report_form #payment_types, #kas_report_form #customer_group_filter').change(
+        function() {
+            kas_report.ajax.reload();
+        }
+    );
+
     //Items report
     if ($('#ir_purchase_date_filter').length == 1) {
         $('#ir_purchase_date_filter').daterangepicker(dateRangeSettings, function(start, end) {

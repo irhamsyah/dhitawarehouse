@@ -766,6 +766,15 @@ class AdminSidebarMenu
                             );
                         }
 
+                        if (auth()->user()->can('sell_payment_report.view')) {
+                        // laporan kas 
+                            $sub->url(
+                                action([\App\Http\Controllers\ReportController::class, 'KasReport']),
+                                __('Laporan Kas'),
+                                ['icon' => '', 'active' => request()->segment(2) == 'kas-report']
+                            );
+                        }
+
                         if (in_array('expenses', $enabled_modules) && auth()->user()->can('expense_report.view')) {
                             $sub->url(
                                 action([\App\Http\Controllers\ReportController::class, 'getExpenseReport']),

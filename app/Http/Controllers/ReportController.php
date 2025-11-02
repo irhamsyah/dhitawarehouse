@@ -2594,6 +2594,179 @@ class ReportController extends Controller
     }
 
     /**
+     * Shows Kas report
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function KasReport(Request $request)
+    {
+        if (! auth()->user()->can('sell_payment_report.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = $request->session()->get('user.business_id');
+
+        $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
+        if ($request->ajax()) {
+            $customer_id = $request->get('supplier_id', null);
+            $contact_filter1 = ! empty($customer_id) ? "AND t.contact_id=$customer_id" : '';
+            $contact_filter2 = ! empty($customer_id) ? "AND transactions.contact_id=$customer_id" : '';
+
+            $location_id = $request->get('location_id', null);
+            $parent_payment_query_part = empty($location_id) ? 'AND transaction_payments.parent_id IS NULL' : '';
+
+            $query = DB::table('transaction_payments')
+                    ->leftJoin('transactions as t', function ($join) use ($business_id) {
+                        $join->on('transaction_payments.transaction_id', '=', 't.id')
+                            ->where('t.business_id', $business_id)
+                            ->whereIn('t.type', ['sell', 'opening_balance', 'sell_return', 'expense']);
+                    })
+                    ->leftJoin('contacts as c', 't.contact_id', '=', 'c.id')
+                    ->leftJoin('customer_groups as CG', 'c.customer_group_id', '=', 'CG.id')
+                    ->leftJoin('expense_categories as ec', 't.expense_category_id', '=', 'ec.id')
+                    ->leftJoin(DB::raw("(
+                        SELECT 
+                            tp.id AS payment_id, 
+                            IF(
+                                tp.transaction_id IS NULL, 
+                                (
+                                    SELECT c2.name 
+                                    FROM transactions AS ts
+                                    JOIN contacts AS c2 ON ts.contact_id = c2.id 
+                                    WHERE ts.id = (
+                                        SELECT tps.transaction_id 
+                                        FROM transaction_payments AS tps 
+                                        WHERE tps.parent_id = tp.id 
+                                        LIMIT 1
+                                    )
+                                ), 
+                                CONCAT(
+                                    COALESCE(CONCAT(c.supplier_business_name, '<br>'), ''), 
+                                    c.name
+                                )
+                            ) AS customer_name
+                        FROM transaction_payments tp
+                        LEFT JOIN transactions t ON tp.transaction_id = t.id
+                        LEFT JOIN contacts c ON t.contact_id = c.id
+                    ) AS customer_subquery"), 'transaction_payments.id', '=', 'customer_subquery.payment_id')
+                    ->where('transaction_payments.business_id', $business_id)
+                    ->where(function ($q) use ($business_id) {
+                        $q->whereRaw("(transaction_payments.transaction_id IS NOT NULL AND t.type IN ('sell', 'opening_balance', 'sell_return', 'expense'))")
+                        ->orWhereRaw("
+                            EXISTS (
+                                SELECT *
+                                FROM transaction_payments AS tp
+                                JOIN transactions ON tp.transaction_id = transactions.id
+                                WHERE transactions.type IN ('sell', 'opening_balance', 'sell_return', 'expense')
+                                AND transactions.business_id = $business_id
+                                AND tp.parent_id = transaction_payments.id
+                            )
+                        ");
+                    })
+                    ->select(
+                        't.type',
+                        DB::raw('IFNULL(customer_subquery.customer_name, ec.name) AS customer'),
+                        'transaction_payments.amount',
+                        'transaction_payments.is_return',
+                        'method',
+                        'paid_on',
+                        'transaction_payments.payment_ref_no',
+                        'transaction_payments.document',
+                        'transaction_payments.transaction_no',
+                        't.invoice_no',
+                        'c.contact_id',
+                        't.id AS transaction_id',
+                        'cheque_number',
+                        'card_transaction_number',
+                        'bank_account_number',
+                        'transaction_payments.id AS DT_RowId',
+                        'CG.name AS customer_group'
+                    )
+                    ->groupBy('transaction_payments.id');
+
+            $start_date = $request->get('start_date');
+            $end_date = $request->get('end_date');
+            //  dd($start_date);
+            if (! empty($start_date) && ! empty($end_date)) {
+                $query->whereBetween(DB::raw('date(paid_on)'), [$start_date, $end_date]);
+            }
+
+            $permitted_locations = auth()->user()->permitted_locations();
+            if ($permitted_locations != 'all') {
+                $query->whereIn('t.location_id', $permitted_locations);
+            }
+
+            if (! empty($request->get('customer_group_id'))) {
+                $query->where('CG.id', $request->get('customer_group_id'));
+            }
+
+            if (! empty($location_id)) {
+                $query->where('t.location_id', $location_id);
+            }
+            if (! empty($request->has('commission_agent'))) {
+                $query->where('t.commission_agent', $request->get('commission_agent'));
+            }
+
+            if (! empty($request->get('payment_types'))) {
+                $query->where('transaction_payments.method', $request->get('payment_types'));
+            }
+
+            return Datatables::of($query)
+                 ->editColumn('invoice_no', function ($row) {
+                     if (! empty($row->transaction_id)) {
+                         return '<a data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->transaction_id])
+                            .'" href="#" data-container=".view_modal" class="btn-modal">'.$row->invoice_no.'</a>';
+                     } else {
+                         return '';
+                     }
+                 })
+                ->editColumn('paid_on', '{{@format_datetime($paid_on)}}')
+                ->editColumn('method', function ($row) use ($payment_types) {
+                    $method = ! empty($payment_types[$row->method]) ? $payment_types[$row->method] : '';
+                    if ($row->method == 'cheque') {
+                        $method .= '<br>('.__('lang_v1.cheque_no').': '.$row->cheque_number.')';
+                    } elseif ($row->method == 'card') {
+                        $method .= '<br>('.__('lang_v1.card_transaction_no').': '.$row->card_transaction_number.')';
+                    } elseif ($row->method == 'bank_transfer') {
+                        $method .= '<br>('.__('lang_v1.bank_account_no').': '.$row->bank_account_number.')';
+                    } elseif ($row->method == 'custom_pay_1') {
+                        $method .= '<br>('.__('lang_v1.transaction_no').': '.$row->transaction_no.')';
+                    } elseif ($row->method == 'custom_pay_2') {
+                        $method .= '<br>('.__('lang_v1.transaction_no').': '.$row->transaction_no.')';
+                    } elseif ($row->method == 'custom_pay_3') {
+                        $method .= '<br>('.__('lang_v1.transaction_no').': '.$row->transaction_no.')';
+                    }
+                    if ($row->is_return == 1) {
+                        $method .= '<br><small>('.__('lang_v1.change_return').')</small>';
+                    }
+
+                    return $method;
+                })
+                ->editColumn('amount', function ($row) {
+                    $amount = $row->is_return == 1 ? -1 * $row->amount : $row->amount;
+                    if( $row->type == 'expense' ){
+                        $amount = -1 * $row->amount;
+                    }
+                    if( $row->type == 'sell_return' ){
+                        $amount = -1 * $row->amount;
+                    }
+                    return '<span class="paid-amount" data-orig-value="'.$amount.'" 
+                    >'.$this->transactionUtil->num_f($amount, true).'</span>';
+                })
+                ->addColumn('action', '<button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary view_payment" data-href="{{ action([\App\Http\Controllers\TransactionPaymentController::class, \'viewPayment\'], [$DT_RowId]) }}">@lang("messages.view")
+                    </button> @if(!empty($document))<a href="{{asset("/uploads/documents/" . $document)}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent" download=""><i class="fa fa-download"></i> @lang("purchase.download_document")</a>@endif')
+                ->rawColumns(['invoice_no', 'amount', 'method', 'action', 'customer'])
+                ->make(true);
+        }
+        $business_locations = BusinessLocation::forDropdown($business_id);
+        $customers = Contact::customersDropdown($business_id, false);
+        $customer_groups = CustomerGroup::forDropdown($business_id, false, true);
+
+        return view('report.kas_report')
+            ->with(compact('business_locations', 'customers', 'payment_types', 'customer_groups'));
+    }
+
+    /**
      * Shows tables report
      *
      * @return \Illuminate\Http\Response

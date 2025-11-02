@@ -344,6 +344,19 @@ var dateRangeSettings = {
     },
 };
 
+var nowDateRangeSettings = {
+    ranges: ranges,
+    startDate: moment(), // ⬅️ hari ini
+    endDate: moment(),   // ⬅️ hari ini
+    locale: {
+        cancelLabel: LANG.clear,
+        applyLabel: LANG.apply,
+        customRangeLabel: LANG.custom_range,
+        format: moment_date_format,
+        toLabel: '~',
+    },
+};
+
 //Check for number string in input field, if data-decimal is 0 then don't allow decimal symbol and if no_neg then don't allow  negative value
 $(document).on('keypress', 'input.input_number', function (event) {
     var is_decimal = $(this).data('decimal');
