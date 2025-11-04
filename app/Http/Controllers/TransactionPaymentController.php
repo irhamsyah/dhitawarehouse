@@ -255,6 +255,15 @@ class TransactionPaymentController extends Controller
                         // dd($inputs);
                         $inputs['transaction_type'] = $transaction->type;
                         event(new TransactionPaymentAdded($tp, $inputs));
+
+                        $transaction_data['final_total'] = $inputs['amount'];
+                        $transaction_data['business_id'] = $business_id;
+                        $transaction_data['created_by'] = auth()->user()->id;
+                        $transaction_data['type'] = 'premi';
+                        $transaction_data['payment_status'] = 'due';
+                        $transaction_data['transaction_date'] = \Carbon::now()->toDateTimeString();
+                        $transaction_data['ref_no'] = $inputs['payment_ref_no'];
+                        $transaction_premi = Transaction::create($transaction_data);
                     }
 
                     //update payment status
@@ -282,6 +291,15 @@ class TransactionPaymentController extends Controller
                         // dd($inputs);
                         $inputs['transaction_type'] = $transaction->type;
                         event(new TransactionPaymentAdded($tp, $inputs));
+
+                        $transaction_data['final_total'] = $inputs['amount'];
+                        $transaction_data['business_id'] = $business_id;
+                        $transaction_data['created_by'] = auth()->user()->id;
+                        $transaction_data['type'] = 'titipan_premi';
+                        $transaction_data['payment_status'] = 'due';
+                        $transaction_data['transaction_date'] = \Carbon::now()->toDateTimeString();
+                        $transaction_data['ref_no'] = $inputs['payment_ref_no'];
+                        $transaction_titipan = Transaction::create($transaction_data);
                     }
 
                     //update payment status
