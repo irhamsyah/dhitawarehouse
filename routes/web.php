@@ -24,6 +24,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GroupTaxController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UangMukaController;
+use App\Http\Controllers\PremiTitipanController;
 use App\Http\Controllers\ImportOpeningStockController;
 use App\Http\Controllers\ImportProductsController;
 use App\Http\Controllers\ImportSalesController;
@@ -228,6 +229,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::resource('sells', SellController::class)->except(['show']);
 
     Route::resource('uang-muka', UangMukaController::class)->except(['show']);
+    Route::resource('premi-titipan', PremiTitipanController::class)->except(['show']);
+    
 
     Route::resource('sales-admin', SalesAdminController::class)->except(['show']);
     Route::get('/sales-admin/target-penjualan', [SalesAdminController::class, 'target_penjualan']);
