@@ -258,6 +258,8 @@ class TransactionPaymentController extends Controller
 
                         $transaction_data['final_total'] = $inputs['amount'];
                         $transaction_data['business_id'] = $business_id;
+                        $transaction_data['contact_id'] = $transaction->contact_id;
+                        $transaction_data['location_id'] = $transaction->location_id;
                         $transaction_data['created_by'] = auth()->user()->id;
                         $transaction_data['type'] = 'premi';
                         $transaction_data['payment_status'] = 'due';
