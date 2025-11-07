@@ -516,6 +516,9 @@ $(document).ready(function() {
 
     //Purchase table
     purchase_table = $('#purchase_table').DataTable({
+        columnDefs: [
+            { targets: [3, 5, 8], visible: false } // 3 = location, 8 = payment_due (0-based index)
+        ],
         processing: true,
         serverSide: true,
         fixedHeader:false,

@@ -94,7 +94,7 @@
                     </div>
                 @endslot
             @endcan
-            @include('purchase.partials.purchase_table')
+            @include('premi_titipan.partials.purchase_table')
         @endcomponent
 
         <div class="modal fade product_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">

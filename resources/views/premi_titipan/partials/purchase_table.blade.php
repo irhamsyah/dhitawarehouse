@@ -15,12 +15,12 @@
     </thead>
     <tfoot>
         <tr class="bg-gray font-17 text-center footer-total">
-            <td colspan="5"><strong>@lang('sale.total'):</strong></td>
+            <td colspan="4"><strong>@lang('sale.total'):</strong></td>
             <td class="footer_status_count"></td>
             <td class="footer_payment_status_count"></td>
             <td class="footer_purchase_total"></td>
-            <td class="text-left"><small>@lang('report.purchase_due') - <span class="footer_total_due"></span><br>
-            @lang('lang_v1.purchase_return') - <span class="footer_total_purchase_return_due"></span>
+            <td class="text-left"><small>@lang('Jatuh tempo Premi dan Titipan') - <span class="footer_total_due"></span><br>
+            <!-- @lang('lang_v1.purchase_return') - <span class="hidden footer_total_purchase_return_due"></span> -->
             </small></td>
             <td></td>
         </tr>
