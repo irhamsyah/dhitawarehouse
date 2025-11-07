@@ -101,6 +101,8 @@ class PremiTitipanController extends Controller
                 $purchases->where('transactions.created_by', request()->session()->get('user.id'));
             }
 
+            // dd($purchases->toSql());
+
             return Datatables::of($purchases)
                 ->addColumn('action', function ($row) {
                     $html = '<div class="btn-group">

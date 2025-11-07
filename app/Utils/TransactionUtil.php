@@ -5133,7 +5133,10 @@ class TransactionUtil extends Util
                     )
                     ->leftJoin('users as u', 'transactions.created_by', '=', 'u.id')
                     ->where('transactions.business_id', $business_id)
-                    ->where('transactions.type', 'premi')
+                    ->where(function($q) {
+                        $q->where('transactions.type', 'premi')
+                        ->orWhere('transactions.type', 'titipan_premi');
+                    })
                     ->select(
                         'transactions.id',
                         'transactions.document',
@@ -5156,6 +5159,7 @@ class TransactionUtil extends Util
                         DB::raw("CONCAT(COALESCE(u.surname, ''),' ',COALESCE(u.first_name, ''),' ',COALESCE(u.last_name,'')) as added_by")
                     )
                     ->groupBy('transactions.id');
+
         return $purchases;
     }
 
