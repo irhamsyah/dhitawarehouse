@@ -343,16 +343,16 @@ class AdminSidebarMenu
                     function ($sub) use ($enabled_modules, $is_admin) {
                         if ($is_admin || auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'direct_sell.view', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping'])) {
                             $sub->url(
-                                action([\App\Http\Controllers\UangMukaController::class, 'index']),
+                                action([\App\Http\Controllers\RealisasiTransferController::class, 'RealisasiTransfer']),
                                 __('Daftar Transfer'),
-                                ['icon' => '', 'active' => request()->segment(1) == 'uang-muka' && request()->segment(2) == null]
+                                ['icon' => '', 'active' => request()->segment(1) == 'daftar-transfer' && request()->segment(2) == null]
                             );
                         }
                         if (in_array('add_sale', $enabled_modules) && auth()->user()->can('direct_sell.access')) {
                             $sub->url(
-                                action([\App\Http\Controllers\UangMukaController::class, 'create']),
+                                action([\App\Http\Controllers\RealisasiTransferController::class, 'RealisasiTransfer']),
                                 __('Realisasi Transfer'),
-                                ['icon' => '', 'active' => request()->segment(1) == 'uang-muka' && request()->segment(2) == 'create' && empty(request()->get('status'))]
+                                ['icon' => '', 'active' => request()->segment(1) == 'realisasi-transfer' && request()->segment(2) == null && empty(request()->get('status'))]
                             );
                         }
                     },
