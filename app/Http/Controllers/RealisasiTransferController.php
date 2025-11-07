@@ -94,7 +94,7 @@ class RealisasiTransferController extends Controller
                     ->leftJoin('transactions as t', function ($join) use ($business_id) {
                         $join->on('transaction_payments.transaction_id', '=', 't.id')
                             ->where('t.business_id', $business_id)
-                            ->whereIn('t.type', ['sell', 'opening_balance', 'sell_return', 'expense']);
+                            ->whereIn('t.type', ['purchase','titipan_premi','premi','sell', 'opening_balance', 'sell_return', 'expense']);
                     })
                     ->leftJoin('contacts as c', 't.contact_id', '=', 'c.id')
                     ->leftJoin('customer_groups as CG', 'c.customer_group_id', '=', 'CG.id')
@@ -126,13 +126,13 @@ class RealisasiTransferController extends Controller
                     ) AS customer_subquery"), 'transaction_payments.id', '=', 'customer_subquery.payment_id')
                     ->where('transaction_payments.business_id', $business_id)
                     ->where(function ($q) use ($business_id) {
-                        $q->whereRaw("(transaction_payments.transaction_id IS NOT NULL AND t.type IN ('sell', 'opening_balance', 'sell_return', 'expense'))")
+                        $q->whereRaw("(transaction_payments.transaction_id IS NOT NULL AND t.type IN ('purchase','titipan_premi','premi','sell', 'opening_balance', 'sell_return', 'expense'))")
                         ->orWhereRaw("
                             EXISTS (
                                 SELECT *
                                 FROM transaction_payments AS tp
                                 JOIN transactions ON tp.transaction_id = transactions.id
-                                WHERE transactions.type IN ('sell', 'opening_balance', 'sell_return', 'expense')
+                                WHERE transactions.type IN ('purchase','titipan_premi','premi','sell', 'opening_balance', 'sell_return', 'expense')
                                 AND transactions.business_id = $business_id
                                 AND tp.parent_id = transaction_payments.id
                             )
