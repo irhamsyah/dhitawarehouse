@@ -8,6 +8,7 @@ use App\BusinessLocation;
 use App\CashDenomination;
 use App\Contact;
 use App\Currency;
+use Carbon\Carbon;
 use App\Events\TransactionPaymentAdded;
 use App\Events\TransactionPaymentDeleted;
 use App\Events\TransactionPaymentUpdated;
@@ -5099,6 +5100,222 @@ class TransactionUtil extends Util
         }
 
         return $sells;
+    }
+
+    /**
+     * common function to get
+     * list sell
+     *
+     * @param  int  $business_id
+     * @return object
+     */
+    public function getListSellsBySalesman($business_id, $sale_type = 'sell')
+    {
+        $sells = Transaction::join('model_has_roles', 'transactions.created_by', '=', 'model_has_roles.model_id')
+        ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+        ->join('users as u', 'transactions.created_by', '=', 'u.id')
+        ->leftJoin('contacts', 'transactions.contact_id', '=', 'contacts.id')
+        ->leftJoin('transaction_sell_lines as tsl', function ($join) {
+            $join->on('transactions.id', '=', 'tsl.transaction_id')
+                ->whereNull('tsl.parent_sell_line_id');
+        })
+        ->leftJoin('users as ss', 'transactions.res_waiter_id', '=', 'ss.id')
+        ->leftJoin('users as dp', 'transactions.delivery_person', '=', 'dp.id')
+        ->leftJoin('res_tables as tables', 'transactions.res_table_id', '=', 'tables.id')
+        ->join('business_locations AS bl', 'transactions.location_id', '=', 'bl.id')
+        ->leftJoin('transactions AS SR', 'transactions.id', '=', 'SR.return_parent_id')
+        ->leftJoin('types_of_services AS tos', 'transactions.types_of_service_id', '=', 'tos.id')
+        ->where('roles.name', 'Sales#1')
+        ->where('transactions.business_id', $business_id)
+        ->where('transactions.type', $sale_type)
+        ->select(
+            'transactions.id',
+            'transactions.transaction_date',
+            'transactions.type',
+            'transactions.is_direct_sale',
+            'transactions.invoice_no',
+            'transactions.invoice_no as invoice_no_text',
+            'contacts.name',
+            'contacts.mobile',
+            'contacts.contact_id',
+            'contacts.supplier_business_name',
+            'transactions.status',
+            'transactions.payment_status',
+            'transactions.final_total',
+            'transactions.tax_amount',
+            'transactions.discount_amount',
+            'transactions.discount_type',
+            'transactions.total_before_tax',
+            'transactions.rp_redeemed',
+            'transactions.rp_redeemed_amount',
+            'transactions.rp_earned',
+            'transactions.types_of_service_id',
+            'transactions.shipping_status',
+            'transactions.pay_term_number',
+            'transactions.pay_term_type',
+            'transactions.additional_notes',
+            'transactions.staff_note',
+            'transactions.shipping_details',
+            'transactions.document',
+            'transactions.shipping_custom_field_1',
+            'transactions.shipping_custom_field_2',
+            'transactions.shipping_custom_field_3',
+            'transactions.shipping_custom_field_4',
+            'transactions.shipping_custom_field_5',
+            'transactions.custom_field_1',
+            'transactions.custom_field_2',
+            'transactions.custom_field_3',
+            'transactions.custom_field_4',
+            DB::raw('DATE_FORMAT(transactions.transaction_date, "%Y/%m/%d") as sale_date'),
+            DB::raw("CONCAT(COALESCE(u.surname, ''),' ',COALESCE(u.first_name, ''),' ',COALESCE(u.last_name,'')) as added_by"),
+            DB::raw('(SELECT SUM(IF(TP.is_return = 1,-1*TP.amount,TP.amount)) FROM transaction_payments AS TP WHERE TP.transaction_id=transactions.id) as total_paid'),
+            'bl.name as business_location',
+            DB::raw('COUNT(SR.id) as return_exists'),
+            DB::raw('(SELECT SUM(TP2.amount) FROM transaction_payments AS TP2 WHERE TP2.transaction_id=SR.id ) as return_paid'),
+            DB::raw('COALESCE(SR.final_total, 0) as amount_return'),
+            'SR.id as return_transaction_id',
+            'tos.name as types_of_service_name',
+            'transactions.service_custom_field_1',
+            DB::raw('COUNT( DISTINCT tsl.id) as total_items'),
+            DB::raw("CONCAT(COALESCE(ss.surname, ''),' ',COALESCE(ss.first_name, ''),' ',COALESCE(ss.last_name,'')) as waiter"),
+            'tables.name as table_name',
+            DB::raw('SUM(tsl.quantity - tsl.so_quantity_invoiced) as so_qty_remaining'),
+            'transactions.is_export',
+            DB::raw("CONCAT(COALESCE(dp.surname, ''),' ',COALESCE(dp.first_name, ''),' ',COALESCE(dp.last_name,'')) as delivery_person")
+        );
+
+        if ($sale_type == 'sell') {
+            $sells->where('transactions.status', 'final');
+        }
+        return $sells;
+    }
+
+    /**
+     * common function to get
+     * list sell
+     *
+     * @param  int  $business_id
+     * @return object
+     */
+    public function getListSellsRecapBySalesman($business_id, $sale_type = 'sell')
+    {
+
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
+        $sells = DB::table('users as u')
+                    ->join('model_has_roles', 'u.id', '=', 'model_has_roles.model_id')
+                    ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+                    ->leftJoin('transactions', 'transactions.created_by', '=', 'u.id')
+                    ->where('roles.name', 'Sales#1')
+                    ->select(
+                        'u.id',
+                        'u.first_name',
+                        'u.last_name',
+                        'u.sales_target',
+                        'u.remaining_target',
+                        'u.id as created_by',
+                        DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS added_by"),
+                        DB::raw("
+                            SUM(
+                                CASE
+                                    WHEN transactions.status = 'final'
+                                        AND transactions.business_id = 1
+                                        AND transactions.type = 'sell'
+                                        AND MONTH(transactions.transaction_date) = $currentMonth
+                                        AND YEAR(transactions.transaction_date) = $currentYear
+                                    THEN (
+                                        SELECT 
+                                            SUM(CASE 
+                                                    WHEN TP.is_return = 1 THEN -1 * TP.amount 
+                                                    ELSE TP.amount 
+                                                END)
+                                        FROM transaction_payments AS TP
+                                        WHERE TP.transaction_id = transactions.id
+                                    )
+                                    ELSE 0
+                                END
+                            ) AS total_paid
+                        "),
+                        DB::raw("
+                            SUM(
+                                CASE
+                                WHEN transactions.status = 'final'
+                                    AND transactions.business_id = 1
+                                    AND transactions.type = 'sell'
+                                    AND MONTH(transactions.transaction_date) = $currentMonth
+                                    AND YEAR(transactions.transaction_date) = $currentYear
+                                THEN (
+                                    SELECT 
+                                        SUM(
+                                            TSL.quantity - TSL.quantity_returned
+                                        ) 
+                                    FROM transaction_sell_lines AS TSL
+                                    WHERE TSL.transaction_id = transactions.id
+                                )
+                                ELSE 0
+                            END
+                            ) AS total_qty
+                        ")
+                    )
+                    ->groupBy('u.id', 'u.first_name', 'u.last_name', 'u.sales_target', 'u.remaining_target', 'u.surname');
+        return $sells;
+    }
+
+    /**
+     * common function to get
+     * list sell
+     *
+     * @param  int  $business_id
+     * @return object
+     */
+    public function getProductSellsRecapBySalesman($business_location)
+    {
+
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
+        $sells = $results = DB::table('product_locations')
+                            ->leftJoin('business_locations', 'product_locations.location_id', '=', 'business_locations.id')
+                            ->leftJoin('products', 'product_locations.product_id', '=', 'products.id')
+                            ->leftJoin('units', 'products.unit_id', '=', 'units.id')
+                            ->where('business_locations.id', $business_location)
+                            ->select(
+                                'business_locations.name as business_name',
+                                'products.name as product_name',
+                                'products.id as product_id',
+                                'units.actual_name as unit_name',
+                                DB::raw('CAST(product_locations.sales_target AS SIGNED) as sales_target'),
+                                DB::raw('CAST(product_locations.remaining_target AS SIGNED) as remaining_target')
+                            );
+        return $sells;
+    }
+
+    /**
+     * common function to get
+     * list sales visit
+     *
+     * @param  int  $business_id
+     * @return object
+     */
+    public function getAllSalesVisit()
+    {
+
+        $sales_visit = DB::table('sales_visit as sv')
+                            ->leftJoin('users as s', 'sv.sales_id', '=', 's.id')
+                            ->leftJoin('contacts as c', 'sv.customer_id', '=', 'c.id')
+                            ->select('sv.*', 
+                                        'sv.visit_date as visit_date', 
+                                        's.id as sales_id', 
+                                        's.first_name as sales_first_name', 
+                                        'c.id as customer_id',
+                                        'c.first_name as customer_first_name',
+                                        'c.address_line_1 as customer_address',
+                                        'c.mobile as customer_mobile',
+                                        's.*', 'c.*');
+
+        // dd($sales_visit);
+        return $sales_visit;
     }
 
     /**

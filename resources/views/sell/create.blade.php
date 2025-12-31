@@ -151,17 +151,17 @@
 						<small class="text-danger hide contact_due_text"><strong>@lang('account.customer_due'):</strong> <span></span></small>
 					</div>
 					<small>
-					<strong>
+					<!-- <strong>
 						@lang('lang_v1.billing_address'):
-					</strong>
-					<div id="billing_address_div">
+					</strong> -->
+					<div id="billing_address_div" hidden>
 						{!! $walk_in_customer['contact_address'] ?? '' !!}
 					</div>
 					<br>
-					<strong>
+					<!-- <strong>
 						@lang('lang_v1.shipping_address'):
-					</strong>
-					<div id="shipping_address_div">
+					</strong> -->
+					<div id="shipping_address_div" hidden>
 						{{$walk_in_customer['supplier_business_name'] ?? ''}},<br>
 						{{$walk_in_customer['name'] ?? ''}},<br>
 						{{$walk_in_customer['shipping_address'] ?? ''}}
@@ -218,15 +218,15 @@
 						<input type="hidden" id="disable_qty_alert">
 					@endif
 				@else
-					<div class="@if(!empty($commission_agent)) col-sm-3 @else col-sm-4 @endif">
+					<div class="@if(!empty($commission_agent)) col-sm-3 @else col-sm-4 @endif" hidden>
 						<div class="form-group">
 							{!! Form::label('status', __('sale.status') . ':*') !!}
-							{!! Form::select('status', $statuses, null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'required']); !!}
+							{!! Form::select('status', $statuses, 'final', ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'required']); !!}
 						</div>
 					</div>
 				@endif
 				@if($sale_type != 'sales_order')
-					<div class="col-sm-3">
+					<div class="col-sm-3" hidden>
 						<div class="form-group">
 							{!! Form::label('invoice_scheme_id', __('invoice.invoice_scheme') . ':') !!}
 							{!! Form::select('invoice_scheme_id', $invoice_schemes, $default_invoice_schemes->id, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]); !!}
@@ -234,7 +234,7 @@
 					</div>
 				@endif
 					@can('edit_invoice_number')
-					<div class="col-sm-3">
+					<div class="col-sm-3" hidden>
 						<div class="form-group">
 							{!! Form::label('invoice_no', $sale_type == 'sales_order' ? __('restaurant.order_no') : __('sale.invoice_no') . ':') !!}
 							{!! Form::text('invoice_no', null, ['class' => 'form-control', 'placeholder' => $sale_type == 'sales_order' ? __('restaurant.order_no') : __('sale.invoice_no')]); !!}
@@ -320,7 +320,7 @@
 				        </div>
 				    </div>
 		        @endif
-		        <div class="col-sm-3">
+		        <div class="col-sm-3" hidden>
 	                <div class="form-group">
 	                    {!! Form::label('upload_document', __('purchase.attach_document') . ':') !!}
 	                    {!! Form::file('sell_document', ['id' => 'upload_document', 'accept' => implode(',', array_keys(config('constants.document_upload_mimes_types')))]); !!}
@@ -437,7 +437,7 @@
 					</div>
 				</div>
 			@endcomponent
-			@component('components.widget', ['class' => 'box-solid'])
+			@component('components.widget', ['class' => 'box-solid hidden'])
 				<div class="col-md-4  @if($sale_type == 'sales_order') hide @endif">
 			        <div class="form-group">
 			            {!! Form::label('discount_type', __('sale.discount_type') . ':*' ) !!}
@@ -531,7 +531,7 @@
 				<input type="hidden" name="is_direct_sale" value="1">
 				<input type="hidden" name="is_serial_no" value="1">
 			@endcomponent
-			@component('components.widget', ['class' => 'box-solid'])
+			@component('components.widget', ['class' => 'box-solid hidden'])
 			<div class="col-md-4">
 				<div class="form-group">
 		            {!! Form::label('shipping_details', __('sale.shipping_details')) !!}
@@ -805,7 +805,7 @@
 			@endif
 			@if(empty($status) || !in_array($status, ['quotation', 'draft']))
 				<div class="payment_row" @if($is_enabled_download_pdf) id="payment_rows_div" @endif>
-					<div class="row">
+					<div class="row" hidden>
 						<div class="col-md-12 mb-12">
 							<strong>@lang('lang_v1.advance_balance'):</strong> <span id="advance_balance_text"></span>
 							{!! Form::hidden('advance_balance', null, ['id' => 'advance_balance', 'data-error-msg' => __('lang_v1.required_advance_balance_not_available')]); !!}

@@ -152,11 +152,23 @@
     @component('components.widget', ['title' => __('sale.sells')])
       <div class="col-md-4">
         <div class="form-group">
+          {!! Form::label('sales_target', __( 'lang_v1.sales_target' ) . ':') !!} 
+            {!! Form::text('sales_target', null, ['class' => 'form-control input_number', 'placeholder' => __( 'lang_v1.sales_target' ) ]); !!}
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-group">
+          {!! Form::label('remaining_target', __( 'sales_admin.remaining_target' ) . ':') !!} 
+            {!! Form::text('remaining_target', null, ['class' => 'form-control input_number', 'placeholder' => __( 'sales_admin.remaining_target' ) ]); !!}
+        </div>
+      </div>
+      <div class="col-md-4 hidden">
+        <div class="form-group">
           {!! Form::label('cmmsn_percent', __( 'lang_v1.cmmsn_percent' ) . ':') !!} @show_tooltip(__('lang_v1.commsn_percent_help'))
             {!! Form::text('cmmsn_percent', null, ['class' => 'form-control input_number', 'placeholder' => __( 'lang_v1.cmmsn_percent' ) ]); !!}
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-4 hidden">
         <div class="form-group">
           {!! Form::label('max_sales_discount_percent', __( 'lang_v1.max_sales_discount_percent' ) . ':') !!} @show_tooltip(__('lang_v1.max_sales_discount_percent_help'))
             {!! Form::text('max_sales_discount_percent', null, ['class' => 'form-control input_number', 'placeholder' => __( 'lang_v1.max_sales_discount_percent' ) ]); !!}

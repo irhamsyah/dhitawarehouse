@@ -521,6 +521,15 @@ class SellController extends Controller
 
                     return $return_due_html;
                 })
+                ->addColumn('return_amount', function ($row) {
+                    $amount_return_html = '';
+                    if (! empty($row->return_exists)) {
+                        $amount_return = $row->amount_return;
+                        $amount_return_html .= '<a href="'.action([\App\Http\Controllers\TransactionPaymentController::class, 'show'], [$row->return_transaction_id]).'" class="view_purchase_return_payment_modal"><span class="sell_return" data-orig-value="'.$amount_return.'">'.$this->transactionUtil->num_f($amount_return, true).'</span></a>';
+                    }
+
+                    return $amount_return_html;
+                })
                 ->editColumn('invoice_no', function ($row) use ($is_crm) {
                     $invoice_no = $row->invoice_no;
                     if (! empty($row->woocommerce_order_id)) {
@@ -598,7 +607,7 @@ class SellController extends Controller
                         }
                     }, ]);
 
-            $rawColumns = ['final_total', 'action', 'total_paid', 'total_remaining', 'payment_status', 'invoice_no', 'discount_amount', 'tax_amount', 'total_before_tax', 'shipping_status', 'types_of_service_name', 'payment_methods', 'return_due', 'conatct_name', 'status'];
+            $rawColumns = ['return_amount','final_total', 'action', 'total_paid', 'total_remaining', 'payment_status', 'invoice_no', 'discount_amount', 'tax_amount', 'total_before_tax', 'shipping_status', 'types_of_service_name', 'payment_methods', 'return_due', 'conatct_name', 'status'];
 
             return $datatable->rawColumns($rawColumns)
                       ->make(true);

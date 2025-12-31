@@ -39,11 +39,11 @@
 					</div>
 				</div>
 				<strong>
-					@lang('business.address'):
+					<!-- @lang('business.address'): -->
 				</strong>
-				<div id="supplier_address_div"></div>
+				<div id="supplier_address_div hidden"></div>
 			</div>
-			<div class="@if(!empty($default_purchase_status)) col-sm-4 @else col-sm-3 @endif">
+			<div class="@if(!empty($default_purchase_status)) col-sm-4 @else col-sm-3 @endif hidden">
 				<div class="form-group">
 					{!! Form::label('ref_no', __('purchase.ref_no').':') !!}
 					@show_tooltip(__('lang_v1.leave_empty_to_autogenerate'))
@@ -118,7 +118,7 @@
 		        </div>
 		    </div>
 
-			<div class="col-sm-3">
+			<div class="col-sm-3 hidden">
                 <div class="form-group">
                     {!! Form::label('document', __('purchase.attach_document') . ':') !!}
                     {!! Form::file('document', ['id' => 'upload_document', 'accept' => implode(',', array_keys(config('constants.document_upload_mimes_types')))]); !!}
@@ -319,7 +319,7 @@
 		</div>
 	@endcomponent
 
-	@component('components.widget', ['class' => 'box-primary'])
+	@component('components.widget', ['class' => 'box-primary hidden'])
 		<div class="row">
 			<div class="col-sm-12">
 			<table class="table">
@@ -377,7 +377,7 @@
 			</div>
 		</div>
 	@endcomponent
-	@component('components.widget', ['class' => 'box-primary'])
+	@component('components.widget', ['class' => 'box-primary hidden'])
 	<div class="row">
 		<div class="col-md-4">
 			<div class="form-group">

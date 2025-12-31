@@ -140,6 +140,7 @@ class LoginController extends Controller
 
     public function validateLogin(Request $request)
     {
+        // dd($request);
         if(config('constants.enable_recaptcha')){
             $this->validate($request, [
                 $this->username() => 'required|string',

@@ -133,6 +133,10 @@ class ManageUserController extends Controller
                 $request['dob'] = $this->moduleUtil->uf_date($request->input('dob'));
             }
 
+            $request['sales_target'] = ! empty($request->input('sales_target')) ? $this->moduleUtil->num_uf($request->input('sales_target')) : 0;
+
+            $request['remaining_target'] = ! empty($request->input('remaining_target')) ? $this->moduleUtil->num_uf($request->input('remaining_target')) : 0;
+
             $request['cmmsn_percent'] = ! empty($request->input('cmmsn_percent')) ? $this->moduleUtil->num_uf($request->input('cmmsn_percent')) : 0;
 
             $request['max_sales_discount_percent'] = ! is_null($request->input('max_sales_discount_percent')) ? $this->moduleUtil->num_uf($request->input('max_sales_discount_percent')) : null;
@@ -250,7 +254,7 @@ class ManageUserController extends Controller
                 'blood_group', 'contact_number', 'fb_link', 'twitter_link', 'social_media_1',
                 'social_media_2', 'permanent_address', 'current_address',
                 'guardian_name', 'custom_field_1', 'custom_field_2',
-                'custom_field_3', 'custom_field_4', 'id_proof_name', 'id_proof_number', 'cmmsn_percent', 'gender', 'max_sales_discount_percent', 'family_number', 'alt_number', 'is_enable_service_staff_pin']);
+                'custom_field_3', 'custom_field_4', 'id_proof_name', 'id_proof_number', 'sales_target', 'remaining_target', 'cmmsn_percent', 'gender', 'max_sales_discount_percent', 'family_number', 'alt_number', 'is_enable_service_staff_pin']);
 
             $user_data['status'] = ! empty($request->input('is_active')) ? 'active' : 'inactive';
 
@@ -278,7 +282,10 @@ class ManageUserController extends Controller
             if (! empty($request->input('service_staff_pin'))) {
                 $user_data['service_staff_pin'] = $request->input('service_staff_pin');
             }
-            
+                        
+            $user_data['sales_target'] = ! empty($user_data['sales_target']) ? $this->moduleUtil->num_uf($user_data['sales_target']) : 0;
+
+            $user_data['remaining_target'] = ! empty($user_data['remaining_target']) ? $this->moduleUtil->num_uf($user_data['remaining_target']) : 0;
 
             //Sales commission percentage
             $user_data['cmmsn_percent'] = ! empty($user_data['cmmsn_percent']) ? $this->moduleUtil->num_uf($user_data['cmmsn_percent']) : 0;

@@ -181,6 +181,10 @@
 		//     autoclose: true,
 		//     format: datepicker_date_format
 		// });
+
+		$('form').on('submit', function () {
+			$(this).find('button[type="submit"]').prop('disabled', true);
+		});
 	});
 	$(document).on('change', 'input.return_qty, #discount_amount, #discount_type', function() {
 		update_sell_return_total()

@@ -65,6 +65,75 @@
         </div>
         <hr>
 
+        @if(in_array('sales_admin', $enabled_modules))           
+            <div class="row check_group">
+                <div class="col-md-1">
+                  <h4>@lang( 'Admin Sales' )</h4>
+                </div>
+            
+                <div class="col-md-2">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" class="check_all input-icheck" > {{ __( 'role.select_all' ) }}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="col-md-9">                  
+                  
+                <div class="col-md-12">
+                  <div class="checkbox">
+                    <label>
+                      {!! Form::checkbox('permissions[]', 'sales_admin.all_sales', in_array('sales_admin.all_sales', $role_permissions),
+                      [ 'class' => 'input-icheck']); !!} {{ __( 'Semua Penjualan' ) }}
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="checkbox">
+                    <label>
+                      {!! Form::checkbox('permissions[]', 'sales_admin.add_sales', in_array('sales_admin.add_sales', $role_permissions),
+                      [ 'class' => 'input-icheck']); !!} {{ __( 'Tambah Penjualan' ) }}
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="checkbox">
+                    <label>
+                      {!! Form::checkbox('permissions[]', 'sales_admin.sales_target', in_array('sales_admin.sales_target', $role_permissions),
+                      [ 'class' => 'input-icheck']); !!} {{ __( 'Target Penjualan' ) }}
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="checkbox">
+                    <label>
+                      {!! Form::checkbox('permissions[]', 'sales_admin.product_sales_target', in_array('sales_admin.product_sales_target', $role_permissions),
+                      [ 'class' => 'input-icheck']); !!} {{ __( 'Target Penjualan Produk' ) }}
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="checkbox">
+                    <label>
+                      {!! Form::checkbox('permissions[]', 'sales_admin.sales_visit', in_array('sales_admin.sales_visit', $role_permissions),
+                      [ 'class' => 'input-icheck']); !!} {{ __( 'Jadwal Kunjungan Sales' ) }}
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="checkbox">
+                    <label>
+                      {!! Form::checkbox('permissions[]', 'sales_admin.add_sales_visit', in_array('sales_admin.add_sales_visit', $role_permissions),
+                      [ 'class' => 'input-icheck']); !!} {{ __( 'Tambah Kunjungan Sales' ) }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr>
+        @endif
+
         <div class="row check_group">
         <div class="col-md-1">
           <h4>@lang( 'role.user' )</h4>
@@ -1344,6 +1413,14 @@
           <div class="col-md-12">
             <div class="checkbox">
               <label>
+                {!! Form::checkbox('permissions[]', 'sell_payment_report.view', in_array('sell_payment_report.view', $role_permissions),
+                [ 'class' => 'input-icheck']); !!} {{ __( 'Lihat Laporan Pembayaran Penjualan' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
                 {!! Form::checkbox('permissions[]', 'tax_report.view', in_array('tax_report.view', $role_permissions), 
                 [ 'class' => 'input-icheck']); !!} {{ __( 'role.tax_report.view' ) }}
               </label>
@@ -1495,6 +1572,14 @@
                         {{ __('lang_v1.view_own_expense') }}
                       </label>
                         </div>
+                  </div>
+                  <div class="col-md-12">
+                    <div class="checkbox">
+                      <label>
+                        {!! Form::checkbox('permissions[]', 'expense.salary', in_array('expense.salary', $role_permissions), 
+                        [ 'class' => 'input-icheck']); !!} {{ __( 'expense.salary_expense' ) }}
+                      </label>
+                    </div>
                   </div>
                   <div class="col-md-12">
                     <div class="checkbox">

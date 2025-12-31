@@ -22,7 +22,7 @@
         </tr>
         <tr>
           <td>
-            <div class="col-sm-6">
+            <div class="col-sm-6" hidden>
               {!! Form::label('single_dpp', trans('product.exc_of_tax') . ':*') !!}
 
               {!! Form::text('single_dpp', $default, ['class' => 'form-control input-sm dpp input_number', 'placeholder' => __('product.exc_of_tax'), 'required']); !!}

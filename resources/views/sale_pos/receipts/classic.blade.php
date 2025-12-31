@@ -15,16 +15,16 @@
 			@endif
 
 			<!-- business information here -->
-			<div class="col-xs-12 text-center">
-				<h2 class="text-center">
+			<div class="col-xs-12 text-center hidden">
+				<h3 class="text-center">
 					<!-- Shop & Location Name  -->
 					@if(!empty($receipt_details->display_name))
 						{{$receipt_details->display_name}}
 					@endif
-				</h2>
+				</h3>
 
 				<!-- Address -->
-				<p>
+				<span>
 				@if(!empty($receipt_details->address))
 						<small class="text-center">
 						{!! $receipt_details->address !!}
@@ -42,7 +42,7 @@
 				@if(!empty($receipt_details->location_custom_fields))
 					<br>{{ $receipt_details->location_custom_fields }}
 				@endif
-				</p>
+				</span>
 				<p>
 				@if(!empty($receipt_details->sub_heading_line1))
 					{{ $receipt_details->sub_heading_line1 }}
@@ -74,9 +74,9 @@
 
 			<!-- Title of receipt -->
 			@if(!empty($receipt_details->invoice_heading))
-				<h3 class="text-center">
+				<h4 class="text-center">
 					{!! $receipt_details->invoice_heading !!}
-				</h3>
+				</h4>
 			@endif
 		</div>
 		@if(!empty($receipt_details->letter_head))
@@ -85,13 +85,21 @@
 			</div>
 		@endif
 	<div class="col-xs-12 text-center">
+		@if(!empty($receipt_details->invoice_heading))
+			<!-- <h5 class="text-center"> -->
+				<!-- {!! $receipt_details->invoice_heading !!} -->
+				 <b>FAKTUR PENJUALAN</b>
+			<!-- </h5> -->
+			 <br>
+			No Invoice {{$receipt_details->invoice_no}} - {{$receipt_details->invoice_date}}
+		@endif
 		<!-- Invoice  number, Date  -->
 		<p style="width: 100% !important" class="word-wrap">
 			<span class="pull-left text-left word-wrap">
-				@if(!empty($receipt_details->invoice_no_prefix))
+				<!-- @if(!empty($receipt_details->invoice_no_prefix))
 					<b>{!! $receipt_details->invoice_no_prefix !!}</b>
 				@endif
-				{{$receipt_details->invoice_no}}
+				{{$receipt_details->invoice_no}} -->
 
 				@if(!empty($receipt_details->types_of_service))
 					<br/>
@@ -123,8 +131,9 @@
 				<!-- customer info -->
 				@if(!empty($receipt_details->customer_info))
 					<br/>
-					<b>{{ $receipt_details->customer_label }}</b> <br> {!! $receipt_details->customer_info !!} <br>
-				@endif
+					<b>{{ $receipt_details->customer_label }}</b>  {!! $receipt_details->customer_info !!} <br>
+				@endif				
+
 				@if(!empty($receipt_details->client_id_label))
 					<br/>
 					<b>{{ $receipt_details->client_id_label }}</b> {{ $receipt_details->client_id }}
@@ -151,7 +160,20 @@
 			</span>
 
 			<span class="pull-right text-left">
-				<b>{{$receipt_details->date_label}}</b> {{$receipt_details->invoice_date}}
+				<!-- <b>{{$receipt_details->date_label}}</b> {{$receipt_details->invoice_date}} -->
+				<!-- <br> -->
+				@if(!empty($receipt_details->display_name))
+					<!-- {{$receipt_details->display_name}} -->
+				@endif
+				<br>
+				@if(!empty($receipt_details->address))
+						<!-- <small class="text-center">
+						{!! $receipt_details->address !!}
+						</small> -->
+				@endif
+				<small class="text-center">A/N : CV DHITA FRESH FRUIT</small>	
+				<br>
+				<small class="text-center">BCA : 1429911999</small>				
 
 				@if(!empty($receipt_details->due_date_label))
 				<br><b>{{$receipt_details->due_date_label}}</b> {{$receipt_details->due_date ?? ''}}
@@ -271,7 +293,7 @@
 	@includeIf('sale_pos.receipts.partial.common_repair_invoice')
 </div>
 
-<div class="row" style="color: #000000 !important;">
+<!-- <div class="row" style="color: #000000 !important;"> -->
 	<div class="col-xs-12">
 		<br/>
 		@php
@@ -287,9 +309,20 @@
 				$p_width -= 10;
 			@endphp
 		@endif
-		<table class="table table-responsive table-slim">
+		<style>
+		.table-bordered td,
+		.table-bordered th {
+			padding: 2px 12px !important; /* vertical | horizontal padding */
+			border: 1px solid #000 !important; /* Darker, solid border */
+		}
+		.table-bordered {
+			border: 1px solid #000 !important;
+		}
+		</style>
+		<table class="table table-responsive table-slim table-bordered">
 			<thead>
 				<tr>
+					<th width="5%">No</th>
 					<th width="{{$p_width}}%">{{$receipt_details->table_product_label}}</th>
 					<th class="text-right" width="15%">{{$receipt_details->table_qty_label}}</th>
 					<th class="text-right" width="15%">{{$receipt_details->table_unit_price_label}}</th>
@@ -303,14 +336,16 @@
 				</tr>
 			</thead>
 			<tbody>
+				@php $total_qty = 0; $total_item = 0; @endphp
 				@forelse($receipt_details->lines as $line)
 					<tr>
+						<td>{{$total_item += 1}}</td>
 						<td>
 							@if(!empty($line['image']))
 								<img src="{{$line['image']}}" alt="Image" width="50" style="float: left; margin-right: 8px;">
 							@endif
                             {{$line['name']}} {{$line['product_variation']}} {{$line['variation']}} 
-                            @if(!empty($line['sub_sku'])), {{$line['sub_sku']}} @endif @if(!empty($line['brand'])), {{$line['brand']}} @endif @if(!empty($line['cat_code'])), {{$line['cat_code']}}@endif
+                            <!-- @if(!empty($line['sub_sku'])), {{$line['sub_sku']}} @endif @if(!empty($line['brand'])), {{$line['brand']}} @endif @if(!empty($line['cat_code'])), {{$line['cat_code']}}@endif -->
                             @if(!empty($line['product_custom_fields'])), {{$line['product_custom_fields']}} @endif
                             @if(!empty($line['product_description']))
                             	<small>
@@ -338,7 +373,7 @@
                         </td>
 						<td class="text-right">
 							{{$line['quantity']}} {{$line['units']}} 
-
+							@php $total_qty += $line['quantity']; @endphp
 							@if($receipt_details->show_base_unit_details && $line['quantity'] && $line['base_unit_multiplier'] !== 1)
                             <br><small>
                             	{{$line['quantity']}} x {{$line['base_unit_multiplier']}} = {{$line['orig_quantity']}} {{$line['base_unit_name']}}
@@ -396,15 +431,15 @@
 			</tbody>
 		</table>
 	</div>
-</div>
+<!-- </div> -->
 
-<div class="row" style="color: #000000 !important;">
+<!-- <div class="row" style="color: #000000 !important;"> -->
 	<div class="col-md-12"><hr/></div>
-	<div class="col-xs-6">
+	<div class="col-xs-12">
 
 		<table class="table table-slim">
 
-			@if(!empty($receipt_details->payments))
+			<!-- @if(!empty($receipt_details->payments))
 				@foreach($receipt_details->payments as $payment)
 					<tr>
 						<td>{{$payment['method']}}</td>
@@ -412,10 +447,10 @@
 						<td class="text-right">{{$payment['date']}}</td>
 					</tr>
 				@endforeach
-			@endif
+			@endif -->
 
 			<!-- Total Paid-->
-			@if(!empty($receipt_details->total_paid))
+			<!-- @if(!empty($receipt_details->total_paid))
 				<tr>
 					<th>
 						{!! $receipt_details->total_paid_label !!}
@@ -424,19 +459,25 @@
 						{{$receipt_details->total_paid}}
 					</td>
 				</tr>
-			@endif
+			@endif -->
 
-			<!-- Total Due-->
-			@if(!empty($receipt_details->total_due) && !empty($receipt_details->total_due_label))
+			
 			<tr>
-				<th>
-					{!! $receipt_details->total_due_label !!}
+				<th style="width:60%">					
+					Total :
 				</th>
-				<td class="text-right">
-					{{$receipt_details->total_due}}
+				<td colspan="2" class="text-right">
+					{{ $total_qty }}
+				</td>
+				<td colspan="2" class="text-right">
+					{{$receipt_details->total}}
+					@if(!empty($receipt_details->total_in_words))
+						<br>
+						<small>({{$receipt_details->total_in_words}})</small>
+					@endif
 				</td>
 			</tr>
-			@endif
+			
 
 			@if(!empty($receipt_details->all_due))
 			<tr>
@@ -447,11 +488,11 @@
 					{{$receipt_details->all_due}}
 				</td>
 			</tr>
-			@endif
+			@endif			
 		</table>
 	</div>
 
-	<div class="col-xs-6">
+	<div class="col-xs-6 hidden">
         <div class="table-responsive">
           	<table class="table table-slim">
 				<tbody>
@@ -603,11 +644,36 @@
 								<small>({{$receipt_details->total_in_words}})</small>
 							@endif
 						</td>
-					</tr>
+					</tr>					
 				</tbody>
         	</table>
-        </div>
+        </div>		
     </div>
+	<div class="border-bottom col-md-12">
+		<table>
+			<tr>
+				<td>Catatan :</td>
+			</tr>
+			<tr><td>1. Harga sudah termasuk PPn.</td></tr>
+			<tr><td>2. Barang yang sudah dibeli tidak dapat ditukar/dikembalikan.</td></tr>	
+			<tr style="height: 10px;"></tr>
+		</table>  
+	</div>
+	<div class="border-bottom col-md-12">			  	        
+		 <table class="table table-slim w-100">
+			<tr>
+				<td class="text-center">Hormat kami</td>
+				<td class="text-center">Pengirim</td>
+				<td class="text-center">Penerima</td>
+			</tr>
+			<tr style="height: 40px;"></tr>
+			<tr>
+				<td class="text-center">Admin</td>
+				<td class="text-center">----------</td>
+				<td class="text-center">----------</td>
+			</tr>
+		</table>
+	</div>
 
     <div class="border-bottom col-md-12">
 	    @if(empty($receipt_details->hide_price) && !empty($receipt_details->tax_summary_label) )
@@ -634,7 +700,7 @@
 	    </div>
     @endif
     
-</div>
+<!-- </div> -->
 <div class="row" style="color: #000000 !important;">
 	@if(!empty($receipt_details->footer_text))
 	<div class="@if($receipt_details->show_barcode || $receipt_details->show_qr_code) col-xs-8 @else col-xs-12 @endif">

@@ -154,15 +154,16 @@ class Util
             }
         }
 
-        $payment_types = ['cash' => __('lang_v1.cash'), 'card' => __('lang_v1.card'), 'cheque' => __('lang_v1.cheque'), 'bank_transfer' => __('lang_v1.bank_transfer'), 'other' => __('lang_v1.other')];
+        // $payment_types = ['cash' => __('lang_v1.cash'), 'card' => __('lang_v1.card'), 'cheque' => __('lang_v1.cheque'), 'bank_transfer' => __('lang_v1.bank_transfer'), 'other' => __('lang_v1.other')];
+        $payment_types = ['cash' => __('lang_v1.cash'), 'card' => __('lang_v1.card'), 'bank_transfer' => __('lang_v1.bank_transfer'), 'other' => __('lang_v1.other')];
 
-        $payment_types['custom_pay_1'] = ! empty($custom_labels['payments']['custom_pay_1']) ? $custom_labels['payments']['custom_pay_1'] : __('lang_v1.custom_payment', ['number' => 1]);
-        $payment_types['custom_pay_2'] = ! empty($custom_labels['payments']['custom_pay_2']) ? $custom_labels['payments']['custom_pay_2'] : __('lang_v1.custom_payment', ['number' => 2]);
-        $payment_types['custom_pay_3'] = ! empty($custom_labels['payments']['custom_pay_3']) ? $custom_labels['payments']['custom_pay_3'] : __('lang_v1.custom_payment', ['number' => 3]);
-        $payment_types['custom_pay_4'] = ! empty($custom_labels['payments']['custom_pay_4']) ? $custom_labels['payments']['custom_pay_4'] : __('lang_v1.custom_payment', ['number' => 4]);
-        $payment_types['custom_pay_5'] = ! empty($custom_labels['payments']['custom_pay_5']) ? $custom_labels['payments']['custom_pay_5'] : __('lang_v1.custom_payment', ['number' => 5]);
-        $payment_types['custom_pay_6'] = ! empty($custom_labels['payments']['custom_pay_6']) ? $custom_labels['payments']['custom_pay_6'] : __('lang_v1.custom_payment', ['number' => 6]);
-        $payment_types['custom_pay_7'] = ! empty($custom_labels['payments']['custom_pay_7']) ? $custom_labels['payments']['custom_pay_7'] : __('lang_v1.custom_payment', ['number' => 7]);
+        // $payment_types['custom_pay_1'] = ! empty($custom_labels['payments']['custom_pay_1']) ? $custom_labels['payments']['custom_pay_1'] : __('lang_v1.custom_payment', ['number' => 1]);
+        // $payment_types['custom_pay_2'] = ! empty($custom_labels['payments']['custom_pay_2']) ? $custom_labels['payments']['custom_pay_2'] : __('lang_v1.custom_payment', ['number' => 2]);
+        // $payment_types['custom_pay_3'] = ! empty($custom_labels['payments']['custom_pay_3']) ? $custom_labels['payments']['custom_pay_3'] : __('lang_v1.custom_payment', ['number' => 3]);
+        // $payment_types['custom_pay_4'] = ! empty($custom_labels['payments']['custom_pay_4']) ? $custom_labels['payments']['custom_pay_4'] : __('lang_v1.custom_payment', ['number' => 4]);
+        // $payment_types['custom_pay_5'] = ! empty($custom_labels['payments']['custom_pay_5']) ? $custom_labels['payments']['custom_pay_5'] : __('lang_v1.custom_payment', ['number' => 5]);
+        // $payment_types['custom_pay_6'] = ! empty($custom_labels['payments']['custom_pay_6']) ? $custom_labels['payments']['custom_pay_6'] : __('lang_v1.custom_payment', ['number' => 6]);
+        // $payment_types['custom_pay_7'] = ! empty($custom_labels['payments']['custom_pay_7']) ? $custom_labels['payments']['custom_pay_7'] : __('lang_v1.custom_payment', ['number' => 7]);
 
         //Unset payment types if not enabled in business location
         if (! empty($location)) {
@@ -180,9 +181,9 @@ class Util
             }
         }
 
-        if ($show_advance) {
-            $payment_types = ['advance' => __('lang_v1.advance')] + $payment_types;
-        }
+        // if ($show_advance) {
+        //     $payment_types = ['advance' => __('lang_v1.advance')] + $payment_types;
+        // }
 
         return $payment_types;
     }
@@ -378,6 +379,20 @@ class Util
         $business_id = empty($business_id) ? $user->business_id : $business_id;
 
         return $user->hasRole('Admin#'.$business_id) ? true : false;
+    }
+
+    /**
+     * Checks if the given user is Sales
+     *
+     * @param  obj  $user
+     * @param  int  $business_id
+     * @return bool
+     */
+    public function is_sales($user, $business_id = null)
+    {
+        $business_id = empty($business_id) ? $user->business_id : $business_id;
+
+        return $user->hasRole('Sales#'.$business_id) ? true : false;
     }
 
     /**
@@ -1259,6 +1274,7 @@ class Util
                 DB::raw("SUM(IF(t.status = 'final' AND t.type = 'sell', final_total, 0)) as total_invoice"),
                 DB::raw("SUM(IF(t.type = 'purchase', final_total, 0)) as total_purchase"),
                 DB::raw("SUM(IF(t.status = 'final' AND t.type = 'sell', (SELECT SUM(IF(is_return = 1,-1*amount,amount)) FROM transaction_payments WHERE transaction_payments.transaction_id=t.id), 0)) as total_paid"),
+                DB::raw("SUM(IF(t.status = 'final' AND t.type = 'sell_return', (SELECT SUM(IF(is_return = 1,-1*amount,amount)) FROM transaction_payments WHERE transaction_payments.transaction_id=t.id), 0)) as total_sell_return_paid"),
                 DB::raw("SUM(IF(t.type = 'purchase', (SELECT SUM(amount) FROM transaction_payments WHERE transaction_payments.transaction_id=t.id), 0)) as purchase_paid"),
                 DB::raw("SUM(IF(t.type = 'opening_balance', final_total, 0)) as opening_balance"),
                 DB::raw("SUM(IF(t.type = 'sell_return', final_total, 0)) as total_sell_return"),
@@ -1270,8 +1286,9 @@ class Util
 
         $contact_payments = $query->first();
 
-        $due = $contact_payments->total_invoice + $contact_payments->total_purchase - $contact_payments->total_paid - $contact_payments->purchase_paid + $contact_payments->opening_balance - $contact_payments->opening_balance_paid - $contact_payments->total_sell_return;
+        $due = $contact_payments->total_invoice + $contact_payments->total_purchase - $contact_payments->total_paid - $contact_payments->purchase_paid + $contact_payments->opening_balance - $contact_payments->opening_balance_paid - ($contact_payments->total_sell_return - $contact_payments->total_sell_return_paid);
 
+        // dd($due);
         return $due;
     }
 

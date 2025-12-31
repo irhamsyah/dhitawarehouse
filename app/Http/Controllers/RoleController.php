@@ -97,6 +97,15 @@ class RoleController extends Controller
 
         $module_permissions = $this->moduleUtil->getModuleData('user_permissions');
 
+        // $role = Role::where('business_id', $business_id)
+        //             ->with(['permissions'])
+        //             ->find(2);
+        // $role_permissions = [];
+        // foreach ($role->permissions as $role_perm) {
+        //     $role_permissions[] = $role_perm->name;
+        // }
+        // dd($role_permissions);
+
         $common_settings = ! empty(session('business.common_settings')) ? session('business.common_settings') : [];
 
         return view('role.create')
@@ -205,6 +214,7 @@ class RoleController extends Controller
         foreach ($role->permissions as $role_perm) {
             $role_permissions[] = $role_perm->name;
         }
+        
 
         $selling_price_groups = SellingPriceGroup::where('business_id', $business_id)
                                     ->active()

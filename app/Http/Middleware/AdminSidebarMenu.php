@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\User;
 use App\Utils\ModuleUtil;
 use Closure;
 use Menu;
@@ -240,7 +241,72 @@ class AdminSidebarMenu
                   </svg>', 'id' => 'tour_step5']
                 )->order(20);
             }
+            
+            //Sales Admin dropdown
+            if (in_array('sales_admin', $enabled_modules)) {
+                $menu->dropdown(
+                    __('sales_admin.sales_admin'),
+                    function ($sub) use ($common_settings) {
+                        
+                        if (auth()->user()->can('sales_admin.all_sales')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\SalesAdminController::class, 'index']),
+                                __('lang_v1.all_sales'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == null]
+                            );
+                        }
+                        if (auth()->user()->can('sales_admin.add_sales')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\SalesAdminController::class, 'create']),
+                                __('sale.add_sale'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'create' && empty(request()->get('status'))]
+                            );
+                        }
+                        if (auth()->user()->can('sales_admin.sales_target')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\SalesAdminController::class, 'target_penjualan']),
+                                __('lang_v1.sales_target'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'target-penjualan' && empty(request()->get('status'))]
+                            );
+                        }
+                        if (auth()->user()->can('sales_admin.product_sales_target')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\SalesAdminController::class, 'target_item']),
+                                __('lang_v1.sales_target_item'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'target-item' && empty(request()->get('status'))]
+                            );
+                        }
+                        if (auth()->user()->can('sales_admin.sales_visit')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\SalesAdminController::class, 'sales_visit']),
+                                __('Jadwal Kunjungan Sales'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'sales-visit' && empty(request()->get('status'))]
+                            );
+                        }
+                        if (auth()->user()->can('sales_admin.add_sales_visit')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\SalesAdminController::class, 'create_visit']),
+                                __('Tambah Kunjungan Sales'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'sales-admin' && request()->segment(2) == 'create-visit' && empty(request()->get('status'))]
+                            );
+                        }
+                    },
+                    ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M12 15v-12"></path>
+                    <path d="M16 7l-4 -4l-4 4"></path>
+                    <path d="M3 12a9 9 0 0 0 18 0"></path>
+                  </svg>', 'id' => 'tour_step7']
+                )->order(25);
+            }
 
+            $business_id = request()->session()->get('user.business_id');
+            $user = User::where('business_id', $business_id)
+                        ->with(['contactAccess'])
+                        ->findOrFail(auth()->user()->id);
+            
+            // dd($user->roles->first()->name);
             //Purchase dropdown
             if (in_array('purchases', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create') || auth()->user()->can('purchase.update'))) {
                 $menu->dropdown(
@@ -293,7 +359,7 @@ class AdminSidebarMenu
                 )->order(25);
             }
             //Sell dropdown
-            if ($is_admin || auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping', 'access_sell_return', 'direct_sell.view', 'direct_sell.update', 'access_own_sell_return'])) {
+            if ($is_admin || (auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping', 'access_sell_return', 'direct_sell.view', 'direct_sell.update', 'access_own_sell_return']) && $user->roles->first()->name=="Cashier#1")) {
                 $menu->dropdown(
                     __('sale.sale'),
                     function ($sub) use ($enabled_modules, $is_admin, $pos_settings) {
@@ -486,12 +552,27 @@ class AdminSidebarMenu
                             __('lang_v1.list_expenses'),
                             ['icon' => '', 'active' => request()->segment(1) == 'expenses' || request()->segment(1) == 'import-expense' && request()->segment(2) == null]
                         );
+                        if (auth()->user()->can('expense.salary')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\ExpenseController::class, 'indexSalary']),
+                                __('lang_v1.list_salaries'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'salary-expenses' || request()->segment(1) == 'import-expense' && request()->segment(2) == null]
+                            );
+                        }
 
                         if (auth()->user()->can('expense.add')) {
                             $sub->url(
                                 action([\App\Http\Controllers\ExpenseController::class, 'create']),
                                 __('expense.add_expense'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'expenses' && request()->segment(2) == 'create']
+                            );
+                        }
+
+                        if (auth()->user()->can('expense.salary')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\ExpenseController::class, 'createSalary']),
+                                __('expense.add_salary'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'create-salary']
                             );
                         }
 
@@ -630,13 +711,14 @@ class AdminSidebarMenu
                                     ['icon' => '', 'active' => request()->segment(2) == 'lot-report']
                                 );
                             }
-
-                            if (in_array('stock_adjustment', $enabled_modules)) {
-                                $sub->url(
-                                    action([\App\Http\Controllers\ReportController::class, 'getStockAdjustmentReport']),
-                                    __('report.stock_adjustment_report'),
-                                    ['icon' => '', 'active' => request()->segment(2) == 'stock-adjustment-report']
-                                );
+                            if (auth()->user()->can('view_product_stock_value')) {
+                                if (in_array('stock_adjustment', $enabled_modules)) {
+                                    $sub->url(
+                                        action([\App\Http\Controllers\ReportController::class, 'getStockAdjustmentReport']),
+                                        __('report.stock_adjustment_report'),
+                                        ['icon' => '', 'active' => request()->segment(2) == 'stock-adjustment-report']
+                                    );
+                                }
                             }
                         }
 
@@ -672,13 +754,27 @@ class AdminSidebarMenu
                                 __('lang_v1.purchase_payment_report'),
                                 ['icon' => '', 'active' => request()->segment(2) == 'purchase-payment-report']
                             );
+                            
+                        }
 
+                        if (auth()->user()->can('sell_payment_report.view')) {
+                        // laporan pembayaran penjualan
                             $sub->url(
                                 action([\App\Http\Controllers\ReportController::class, 'sellPaymentReport']),
                                 __('lang_v1.sell_payment_report'),
                                 ['icon' => '', 'active' => request()->segment(2) == 'sell-payment-report']
                             );
                         }
+
+                        if (auth()->user()->can('sell_payment_report.view')) {
+                        // laporan kas 
+                            $sub->url(
+                                action([\App\Http\Controllers\ReportController::class, 'KasReport']),
+                                __('Laporan Kas'),
+                                ['icon' => '', 'active' => request()->segment(2) == 'kas-report']
+                            );
+                        }
+
                         if (in_array('expenses', $enabled_modules) && auth()->user()->can('expense_report.view')) {
                             $sub->url(
                                 action([\App\Http\Controllers\ReportController::class, 'getExpenseReport']),
